@@ -128,11 +128,16 @@
     <section id="emptyState" class="hidden py-20 px-4 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
       <h2 class="text-lg font-semibold mb-1.5">No active bans</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
-        Start a ban to track your streak automatically. Finished or cancelled bans are saved in your JSON archive.
+        Start a ban to track your streak automatically, or connect GitHub to load your existing bans.
       </p>
-      <button onclick="openAddBanModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2ea043] hover:bg-[#2c974b] text-white text-sm font-semibold transition cursor-pointer">
-        <span>+ Start a Ban</span>
-      </button>
+      <div class="flex flex-wrap items-center justify-center gap-2.5">
+        <button onclick="openAddBanModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2ea043] hover:bg-[#2c974b] text-white text-sm font-semibold transition cursor-pointer">
+          <span>+ Start a Ban</span>
+        </button>
+        <button onclick="openGithubModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium transition cursor-pointer">
+          <span>Sync from GitHub</span>
+        </button>
+      </div>
     </section>
   </main>
 
@@ -334,7 +339,7 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Branch</label>
-            <input id="ghBranch" type="text" value="main" placeholder="main" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+            <input id="ghBranch" type="text" value="master" placeholder="master" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
           </div>
         </div>
 
@@ -433,7 +438,7 @@
       owner: '',
       repo: '',
       path: 'mybans.json',
-      branch: 'main',
+      branch: 'master',
       token: '',
       lastSha: null
     };
@@ -455,7 +460,7 @@
       startAutoSyncListeners();
 
       if (isGithubConfigured()) {
-        await smartSyncGithub(false);
+        await smartSyncGithub(false, false);
         await checkFinishedBans(true);
       }
     });
@@ -495,32 +500,15 @@
         console.error('Failed to parse local MyBans state:', e);
       }
 
-      // Clean initial starter ban
-      const now = Date.now();
-      const dayMs = 86400 * 1000;
+      // Start empty on a fresh device so connecting GitHub pulls remote bans cleanly
       appState = {
         app: 'MyBans',
         version: 2,
-        lastUpdated: new Date(now).toISOString(),
+        lastUpdated: null,
         lastSyncedAt: null,
-        bans: [
-          {
-            id: 'ban_starter_1',
-            name: 'Late-Night Doomscrolling',
-            why: 'Protect deep sleep and keep mornings focused.',
-            startDate: new Date(now - (11 * dayMs + 6 * 3600 * 1000)).toISOString(),
-            lastDate: new Date(now + (19 * dayMs - 6 * 3600 * 1000)).toISOString(),
-            durationDays: 30,
-            isForever: false,
-            currentStreakDays: 11,
-            bestStreakDays: 11,
-            updatedAt: new Date(now).toISOString(),
-            history: []
-          }
-        ],
+        bans: [],
         savedBans: []
       };
-      saveLocalState();
     }
 
     // -------------------------------------------------------------------------
@@ -924,14 +912,14 @@
     function startAutoSyncListeners() {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          smartSyncGithub(false);
+          smartSyncGithub(false, false);
         }
       });
 
       if (backgroundSyncInterval) clearInterval(backgroundSyncInterval);
       backgroundSyncInterval = setInterval(() => {
         if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          smartSyncGithub(false);
+          smartSyncGithub(false, false);
         }
       }, 30000);
     }
@@ -1197,7 +1185,7 @@
       document.getElementById('ghOwner').value = githubConfig.owner || '';
       document.getElementById('ghRepo').value = githubConfig.repo || '';
       document.getElementById('ghPath').value = githubConfig.path || 'mybans.json';
-      document.getElementById('ghBranch').value = githubConfig.branch || 'main';
+      document.getElementById('ghBranch').value = githubConfig.branch || 'master';
       document.getElementById('ghToken').value = githubConfig.token || '';
       document.getElementById('ghFeedbackBox').classList.add('hidden');
       openModal('modalGithub');
@@ -1208,7 +1196,7 @@
         owner: '',
         repo: '',
         path: 'mybans.json',
-        branch: 'main',
+        branch: 'master',
         token: '',
         lastSha: null
       };
@@ -1216,7 +1204,7 @@
       document.getElementById('ghOwner').value = '';
       document.getElementById('ghRepo').value = '';
       document.getElementById('ghPath').value = 'mybans.json';
-      document.getElementById('ghBranch').value = 'main';
+      document.getElementById('ghBranch').value = 'master';
       document.getElementById('ghToken').value = '';
       updateSyncStatusUI();
       setGhFeedback('Disconnected from GitHub. Data is saved locally.', 'info');
@@ -1227,7 +1215,7 @@
       githubConfig.owner = document.getElementById('ghOwner').value.trim();
       githubConfig.repo = document.getElementById('ghRepo').value.trim();
       githubConfig.path = document.getElementById('ghPath').value.trim() || 'mybans.json';
-      githubConfig.branch = document.getElementById('ghBranch').value.trim() || 'main';
+      githubConfig.branch = document.getElementById('ghBranch').value.trim() || 'master';
       githubConfig.token = document.getElementById('ghToken').value.trim();
       githubConfig.lastSha = null;
 
@@ -1239,26 +1227,46 @@
         return;
       }
 
-      await smartSyncGithub(true);
+      await smartSyncGithub(true, true);
     }
 
-    async function smartSyncGithub(showFeedback = false) {
+    async function fetchRemoteFile(owner, repo, path, branch, token) {
+      const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}&t=${Date.now()}`;
+      return fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+    }
+
+    async function smartSyncGithub(showFeedback = false, isInitialConnect = false) {
       if (!isGithubConfigured()) {
         if (showFeedback) setGhFeedback('Configure GitHub credentials first.', 'error');
         return;
       }
 
       setSyncState('syncing', 'Syncing...');
-      const { owner, repo, path, branch, token } = githubConfig;
-      const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}&t=${Date.now()}`;
+      const { owner, repo, path, token } = githubConfig;
+      let branch = githubConfig.branch;
 
       try {
-        const res = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json'
+        let res = await fetchRemoteFile(owner, repo, path, branch, token);
+
+        // If 404 on initial setup, check alternate default branch (master <-> main) before creating a new file
+        if (res.status === 404 && isInitialConnect) {
+          const altBranch = branch === 'main' ? 'master' : (branch === 'master' ? 'main' : null);
+          if (altBranch) {
+            const altRes = await fetchRemoteFile(owner, repo, path, altBranch, token);
+            if (altRes.ok) {
+              branch = altBranch;
+              githubConfig.branch = altBranch;
+              const branchInput = document.getElementById('ghBranch');
+              if (branchInput) branchInput.value = altBranch;
+              res = altRes;
+            }
           }
-        });
+        }
 
         if (res.status === 404) {
           await pushToGithub(showFeedback, 'Initialize mybans.json');
@@ -1277,6 +1285,36 @@
 
         const localUpdatedMs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
         const remoteUpdatedMs = parsed?.lastUpdated ? new Date(parsed.lastUpdated).getTime() : 0;
+
+        // On initial connect, always pull remote bans first (and merge any unsynced local bans if created offline)
+        if (isInitialConnect && parsed && Array.isArray(parsed.bans)) {
+          const remoteIds = new Set(parsed.bans.map(b => b.id));
+          const extraLocalBans = appState.bans.filter(b => !remoteIds.has(b.id));
+          const remoteSavedIds = new Set((parsed.savedBans || []).map(b => b.id));
+          const extraLocalSaved = (appState.savedBans || []).filter(b => !remoteSavedIds.has(b.id));
+
+          githubConfig.lastSha = remoteSha;
+          appState.bans = [...extraLocalBans, ...parsed.bans];
+          appState.savedBans = [...extraLocalSaved, ...(parsed.savedBans || [])];
+          appState.lastUpdated = parsed.lastUpdated || new Date().toISOString();
+          appState.lastSyncedAt = new Date().toISOString();
+          localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
+          saveLocalState();
+          renderAll();
+
+          if (extraLocalBans.length > 0 || extraLocalSaved.length > 0) {
+            await pushToGithub(showFeedback, 'Merge local bans with GitHub');
+            return;
+          }
+
+          hasUnsyncedLocalChanges = false;
+          setSyncState('synced', 'Synced ✓');
+          if (showFeedback) {
+            setGhFeedback(`Loaded ${appState.bans.length} active & ${(appState.savedBans || []).length} saved ban(s) from ${branch}.`, 'success');
+            showToast('Loaded your bans from GitHub!', 'success');
+          }
+          return;
+        }
 
         if (hasUnsyncedLocalChanges || (localUpdatedMs > remoteUpdatedMs && appState.bans.length > 0)) {
           githubConfig.lastSha = remoteSha;
@@ -1369,7 +1407,7 @@
 
         setSyncState('synced', 'Synced ✓');
         if (showFeedback) {
-          setGhFeedback(`Synced ${path} with ${owner}/${repo}!`, 'success');
+          setGhFeedback(`Synced ${path} with ${owner}/${repo} (${branch})!`, 'success');
           showToast('Synced with GitHub!', 'success');
         }
       } catch (err) {
