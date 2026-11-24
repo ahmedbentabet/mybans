@@ -18,23 +18,12 @@
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
           }
         }
       }
     };
   </script>
   <style>
-    /* Custom scrollbar & smooth transitions */
     body {
       font-family: 'Inter', system-ui, sans-serif;
       transition: background-color 0.25s ease, color 0.25s ease;
@@ -42,7 +31,6 @@
     .tabular-nums {
       font-variant-numeric: tabular-nums;
     }
-    /* Subtle pulsing glow for active streaks */
     @keyframes pulse-ring {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.55; transform: scale(1.15); }
@@ -50,7 +38,6 @@
     .live-dot {
       animation: pulse-ring 2s infinite ease-in-out;
     }
-    /* Custom thin scrollbar for JSON preview & history */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -65,7 +52,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(148, 163, 184, 0.55);
     }
-    /* GitHub-style contribution square hover effect */
     .gh-cell {
       transition: transform 0.12s ease, outline-color 0.12s ease;
     }
@@ -213,7 +199,7 @@
           <div id="detailHeatmapContainer"></div>
         </div>
 
-        <!-- Inline Cancel Confirmation Box (Hidden until user clicks Cancel Ban) -->
+        <!-- Inline Cancel Confirmation Box -->
         <div id="cancelConfirmBox" class="hidden p-4 rounded-xl bg-slate-100 dark:bg-[#0d1117] border border-slate-300 dark:border-slate-700 space-y-3">
           <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
             Cancel this ban now? Your progress will be <strong>saved in <code class="font-mono">mybans.json</code></strong> as cancelled and removed from the home page.
@@ -359,23 +345,13 @@
 
         <div id="ghFeedbackBox" class="hidden p-3 rounded-xl text-xs font-medium"></div>
 
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="pullFromGithub(true)" class="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              ↓ Pull
-            </button>
-            <button type="button" onclick="pushToGithub(true)" class="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              ↑ Push
-            </button>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="disconnectGithub()" class="px-3 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer">
-              Disconnect
-            </button>
-            <button type="button" onclick="saveGithubConfig()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
-              Save & Sync
-            </button>
-          </div>
+        <div class="flex items-center justify-between gap-2 pt-2">
+          <button type="button" onclick="disconnectGithub()" class="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer">
+            Disconnect
+          </button>
+          <button type="button" onclick="saveGithubConfig()" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
+            Save & Sync
+          </button>
         </div>
       </div>
     </div>
@@ -447,6 +423,7 @@
     let appState = {
       app: 'MyBans',
       version: 2,
+      lastUpdated: null,
       lastSyncedAt: null,
       bans: [],       // Active bans shown on Home Page
       savedBans: []   // Finished or Cancelled bans removed from Home Page
@@ -462,6 +439,8 @@
     };
 
     let liveTickerInterval = null;
+    let backgroundSyncInterval = null;
+    let hasUnsyncedLocalChanges = false;
 
     // -------------------------------------------------------------------------
     // 2. INITIALIZATION
@@ -473,9 +452,10 @@
       loadGithubConfig();
       renderAll();
       startLiveTicker();
+      startAutoSyncListeners();
 
       if (isGithubConfigured()) {
-        await pullFromGithub(false);
+        await smartSyncGithub(false);
         await checkFinishedBans(true);
       }
     });
@@ -503,6 +483,7 @@
             appState = {
               app: 'MyBans',
               version: 2,
+              lastUpdated: parsed.lastUpdated || null,
               lastSyncedAt: parsed.lastSyncedAt || null,
               bans: parsed.bans,
               savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
@@ -520,6 +501,7 @@
       appState = {
         app: 'MyBans',
         version: 2,
+        lastUpdated: new Date(now).toISOString(),
         lastSyncedAt: null,
         bans: [
           {
@@ -583,10 +565,6 @@
       };
     }
 
-    /**
-     * Automatically archives any timed ban whose target end date has been reached,
-     * saving it to savedBans in mybans.json and removing it from the home page.
-     */
     async function checkFinishedBans(shouldSync = true) {
       const nowMs = Date.now();
       const stillActive = [];
@@ -658,16 +636,11 @@
       return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
 
-    /**
-     * Marks every active/clean day for this specific ban as active (green).
-     * All other days remain inactive (grey). No other green degrees or colors.
-     */
     function buildBanDayMap(ban) {
       const dayMap = new Map();
       const now = new Date();
       const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-      // Include any archived runs of this same ban name if present in savedBans
       const relatedRuns = (appState.savedBans || []).filter(
         sb => sb.name && ban.name && sb.name.trim().toLowerCase() === ban.name.trim().toLowerCase()
       );
@@ -687,7 +660,6 @@
         }
       });
 
-      // Current ban run
       if (ban.startDate) {
         const startMid = parseLocalMidnight(ban.startDate);
         const endLimit = ban.endedAt ? parseLocalMidnight(ban.endedAt) : todayMid;
@@ -708,7 +680,6 @@
     }
 
     function getHeatmapCellStyle(info) {
-      // Strictly ONE Green and ONE Grey — no other green degrees
       if (info && info.active) {
         return 'bg-[#2ea043]';
       }
@@ -880,7 +851,7 @@
       return {
         app: 'MyBans',
         version: 2,
-        lastUpdated: new Date(nowMs).toISOString(),
+        lastUpdated: appState.lastUpdated || new Date(nowMs).toISOString(),
         bans: normalizedBans,
         savedBans: appState.savedBans || []
       };
@@ -896,11 +867,13 @@
 
     async function persistAndSync(commitMessage = 'Update MyBans') {
       const nowMs = Date.now();
+      appState.lastUpdated = new Date(nowMs).toISOString();
       appState.bans.forEach(ban => {
         const m = computeBanMetrics(ban, nowMs);
         ban.currentStreakDays = m.days;
         ban.bestStreakDays = m.bestStreakDays;
       });
+      hasUnsyncedLocalChanges = true;
       saveLocalState();
 
       if (isGithubConfigured()) {
@@ -909,7 +882,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // 4. LIVE TICKER (UPDATES TIMERS & AUTO-FINISHES COMPLETED BANS)
+    // 4. LIVE TICKER (UPDATES TIMERS EVERY 1s & AUTO-FINISHES COMPLETED BANS)
     // -------------------------------------------------------------------------
     function startLiveTicker() {
       if (liveTickerInterval) clearInterval(liveTickerInterval);
@@ -921,9 +894,11 @@
 
         appState.bans.forEach(ban => {
           const m = computeBanMetrics(ban, nowMs);
+          const formattedTime = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+
           const cardTimerEl = document.getElementById(`card-timer-${ban.id}`);
           if (cardTimerEl) {
-            cardTimerEl.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m`;
+            cardTimerEl.textContent = formattedTime;
           }
           const cardBarEl = document.getElementById(`card-bar-${ban.id}`);
           if (cardBarEl) {
@@ -936,9 +911,7 @@
 
           if (openDetailId === ban.id) {
             const dTimer = document.getElementById('detailLiveTimer');
-            if (dTimer) {
-              dTimer.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-            }
+            if (dTimer) dTimer.textContent = formattedTime;
             const dBar = document.getElementById('detailProgressBar');
             if (dBar) dBar.style.width = `${m.progressPct.toFixed(2)}%`;
             const dRem = document.getElementById('detailRemainingText');
@@ -946,6 +919,21 @@
           }
         });
       }, 1000);
+    }
+
+    function startAutoSyncListeners() {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && isGithubConfigured()) {
+          smartSyncGithub(false);
+        }
+      });
+
+      if (backgroundSyncInterval) clearInterval(backgroundSyncInterval);
+      backgroundSyncInterval = setInterval(() => {
+        if (document.visibilityState === 'visible' && isGithubConfigured()) {
+          smartSyncGithub(false);
+        }
+      }, 30000);
     }
 
     // -------------------------------------------------------------------------
@@ -988,7 +976,7 @@
 
               <div class="text-right shrink-0">
                 <div id="card-timer-${ban.id}" class="text-base sm:text-lg font-bold font-mono tabular-nums text-[#2ea043]">
-                  ${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m
+                  ${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s
                 </div>
                 <div id="card-rem-${ban.id}" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   ${remainingLabel}
@@ -1215,6 +1203,26 @@
       openModal('modalGithub');
     }
 
+    function disconnectGithub() {
+      githubConfig = {
+        owner: '',
+        repo: '',
+        path: 'mybans.json',
+        branch: 'main',
+        token: '',
+        lastSha: null
+      };
+      localStorage.removeItem(STORAGE_KEY_GH);
+      document.getElementById('ghOwner').value = '';
+      document.getElementById('ghRepo').value = '';
+      document.getElementById('ghPath').value = 'mybans.json';
+      document.getElementById('ghBranch').value = 'main';
+      document.getElementById('ghToken').value = '';
+      updateSyncStatusUI();
+      setGhFeedback('Disconnected from GitHub. Data is saved locally.', 'info');
+      showToast('Disconnected from GitHub.', 'info');
+    }
+
     async function saveGithubConfig() {
       githubConfig.owner = document.getElementById('ghOwner').value.trim();
       githubConfig.repo = document.getElementById('ghRepo').value.trim();
@@ -1231,58 +1239,10 @@
         return;
       }
 
-      await pullFromGithub(true, true);
+      await smartSyncGithub(true);
     }
 
-    function disconnectGithub() {
-      githubConfig = { owner: '', repo: '', path: 'mybans.json', branch: 'main', token: '', lastSha: null };
-      localStorage.removeItem(STORAGE_KEY_GH);
-      updateSyncStatusUI();
-      closeModal('modalGithub');
-      showToast('Disconnected GitHub. Using local JSON storage.', 'info');
-    }
-
-    function setSyncState(state, label) {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncStatusText');
-      dot.className = 'w-2 h-2 rounded-full';
-      if (state === 'synced') dot.classList.add('bg-[#2ea043]');
-      else if (state === 'syncing') dot.classList.add('bg-[#2ea043]', 'animate-ping');
-      else dot.classList.add('bg-slate-400');
-      text.textContent = label;
-    }
-
-    function updateSyncStatusUI() {
-      if (!isGithubConfigured()) {
-        setSyncState('offline', 'Local JSON');
-      } else {
-        setSyncState('synced', `${githubConfig.repo}`);
-      }
-    }
-
-    function setGhFeedback(msg, type = 'info') {
-      const box = document.getElementById('ghFeedbackBox');
-      box.classList.remove('hidden', 'bg-emerald-500/10', 'text-[#2ea043]', 'bg-slate-500/10', 'text-slate-400');
-      if (type === 'success') box.classList.add('bg-emerald-500/10', 'text-[#2ea043]');
-      else box.classList.add('bg-slate-500/10', 'text-slate-600', 'dark:text-slate-300');
-      box.textContent = msg;
-    }
-
-    function utf8ToBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let bin = '';
-      bytes.forEach(b => { bin += String.fromCharCode(b); });
-      return btoa(bin);
-    }
-
-    function base64ToUtf8(b64) {
-      const bin = atob(b64.replace(/\s/g, ''));
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return new TextDecoder().decode(bytes);
-    }
-
-    async function pullFromGithub(showFeedback = false, createIfMissing = false) {
+    async function smartSyncGithub(showFeedback = false) {
       if (!isGithubConfigured()) {
         if (showFeedback) setGhFeedback('Configure GitHub credentials first.', 'error');
         return;
@@ -1300,8 +1260,7 @@
           }
         });
 
-        if (res.status === 404 && createIfMissing) {
-          if (showFeedback) setGhFeedback('Creating mybans.json in repo...', 'info');
+        if (res.status === 404) {
           await pushToGithub(showFeedback, 'Initialize mybans.json');
           return;
         }
@@ -1312,16 +1271,27 @@
         }
 
         const data = await res.json();
-        githubConfig.lastSha = data.sha;
-        localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
-
+        const remoteSha = data.sha;
         const decoded = base64ToUtf8(data.content);
         const parsed = JSON.parse(decoded);
 
+        const localUpdatedMs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
+        const remoteUpdatedMs = parsed?.lastUpdated ? new Date(parsed.lastUpdated).getTime() : 0;
+
+        if (hasUnsyncedLocalChanges || (localUpdatedMs > remoteUpdatedMs && appState.bans.length > 0)) {
+          githubConfig.lastSha = remoteSha;
+          await pushToGithub(showFeedback, 'Sync MyBans');
+          return;
+        }
+
         if (parsed && Array.isArray(parsed.bans)) {
+          githubConfig.lastSha = remoteSha;
           appState.bans = parsed.bans;
           appState.savedBans = Array.isArray(parsed.savedBans) ? parsed.savedBans : (appState.savedBans || []);
+          appState.lastUpdated = parsed.lastUpdated || appState.lastUpdated;
           appState.lastSyncedAt = new Date().toISOString();
+          hasUnsyncedLocalChanges = false;
+          localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
           saveLocalState();
           renderAll();
         }
@@ -1332,7 +1302,7 @@
           showToast('Synced with GitHub!', 'success');
         }
       } catch (err) {
-        console.error('GitHub Pull Error:', err);
+        console.error('GitHub Sync Error:', err);
         setSyncState('error', 'Sync Error');
         if (showFeedback) setGhFeedback(`GitHub Error: ${err.message}`, 'error');
       }
@@ -1344,7 +1314,7 @@
         return;
       }
 
-      setSyncState('syncing', 'Pushing...');
+      setSyncState('syncing', 'Syncing...');
       const { owner, repo, path, branch, token } = githubConfig;
       const baseUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
 
@@ -1392,21 +1362,90 @@
         const putData = await putRes.json();
         githubConfig.lastSha = putData.content?.sha || sha;
         appState.lastSyncedAt = new Date().toISOString();
+        hasUnsyncedLocalChanges = false;
         localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
         saveLocalState();
         renderAll();
 
         setSyncState('synced', 'Synced ✓');
         if (showFeedback) {
-          setGhFeedback(`Saved ${path} to ${owner}/${repo}!`, 'success');
-          showToast('Saved to GitHub!', 'success');
+          setGhFeedback(`Synced ${path} with ${owner}/${repo}!`, 'success');
+          showToast('Synced with GitHub!', 'success');
         }
       } catch (err) {
         console.error('GitHub Push Error:', err);
-        setSyncState('error', 'Push Failed');
-        if (showFeedback) setGhFeedback(`GitHub Push Error: ${err.message}`, 'error');
+        setSyncState('error', 'Sync Failed');
+        if (showFeedback) setGhFeedback(`GitHub Sync Error: ${err.message}`, 'error');
         else showToast(`GitHub sync failed: ${err.message}`, 'error');
       }
+    }
+
+    function updateSyncStatusUI() {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncStatusText');
+      if (!dot || !text) return;
+
+      if (!isGithubConfigured()) {
+        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        text.textContent = 'Local JSON';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-[#2ea043]';
+        text.textContent = githubConfig.repo || 'GitHub';
+      }
+    }
+
+    function setSyncState(state, label) {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncStatusText');
+      if (!dot || !text) return;
+
+      if (state === 'syncing') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400 live-dot';
+        text.textContent = label || 'Syncing...';
+      } else if (state === 'synced') {
+        dot.className = 'w-2 h-2 rounded-full bg-[#2ea043]';
+        text.textContent = label || 'Synced ✓';
+      } else if (state === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        text.textContent = label || 'Sync Error';
+      } else {
+        updateSyncStatusUI();
+      }
+    }
+
+    function setGhFeedback(message, type = 'info') {
+      const box = document.getElementById('ghFeedbackBox');
+      if (!box) return;
+      box.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/30', 'bg-[#2ea043]/10', 'text-[#2ea043]', 'border-[#2ea043]/30', 'bg-slate-500/10', 'text-slate-400', 'border-slate-500/30');
+      box.classList.add('border');
+
+      if (type === 'error') {
+        box.classList.add('bg-rose-500/10', 'text-rose-500', 'border-rose-500/30');
+      } else if (type === 'success') {
+        box.classList.add('bg-[#2ea043]/10', 'text-[#2ea043]', 'border-[#2ea043]/30');
+      } else {
+        box.classList.add('bg-slate-500/10', 'text-slate-600', 'dark:text-slate-300', 'border-slate-500/30');
+      }
+      box.textContent = message;
+    }
+
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    function base64ToUtf8(b64) {
+      const clean = String(b64 || '').replace(/\s/g, '');
+      const binary = atob(clean);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new TextDecoder().decode(bytes);
     }
 
     // -------------------------------------------------------------------------
