@@ -302,23 +302,40 @@
           <label class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
             Duration
           </label>
-          <div class="grid grid-cols-4 gap-2 mb-2.5">
-            <button type="button" onclick="selectStartPreset(7, false)" data-start-preset="7" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">7d</button>
-            <button type="button" onclick="selectStartPreset(14, false)" data-start-preset="14" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">14d</button>
-            <button type="button" onclick="selectStartPreset(30, false)" data-start-preset="30" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition">30d</button>
-            <button type="button" onclick="selectStartPreset(0, true)" data-start-preset="forever" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">Forever ∞</button>
+          <div class="grid grid-cols-5 gap-1.5 mb-2.5">
+            <button type="button" onclick="selectStartPreset(0, 6, false)" data-start-preset="0d6h" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">6h</button>
+            <button type="button" onclick="selectStartPreset(0, 24, false)" data-start-preset="0d24h" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">24h</button>
+            <button type="button" onclick="selectStartPreset(7, 0, false)" data-start-preset="7d0h" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">7d</button>
+            <button type="button" onclick="selectStartPreset(30, 0, false)" data-start-preset="30d0h" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition">30d</button>
+            <button type="button" onclick="selectStartPreset(0, 0, true)" data-start-preset="forever" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">Forever ∞</button>
           </div>
-          <div id="startCustomDaysWrap">
-            <input
-              id="inputStartDays"
-              type="number"
-              min="1"
-              max="36500"
-              value="30"
-              oninput="onStartDaysManualInput()"
-              placeholder="Custom number of days"
-              class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
-            />
+          <div id="startCustomDurationWrap" class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="inputStartDays" class="block text-[11px] text-[#656d76] dark:text-[#8b949e] mb-1">Days</label>
+              <input
+                id="inputStartDays"
+                type="number"
+                min="0"
+                max="36500"
+                value="30"
+                oninput="onStartDurationManualInput()"
+                placeholder="0"
+                class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+              />
+            </div>
+            <div>
+              <label for="inputStartHours" class="block text-[11px] text-[#656d76] dark:text-[#8b949e] mb-1">Hours</label>
+              <input
+                id="inputStartHours"
+                type="number"
+                min="0"
+                max="87600"
+                value="0"
+                oninput="onStartDurationManualInput()"
+                placeholder="0"
+                class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+              />
+            </div>
           </div>
           <input id="inputStartForever" type="hidden" value="false" />
         </div>
@@ -553,20 +570,36 @@
           <label class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
             Total Duration (from Start Date)
           </label>
-          <div class="grid grid-cols-4 gap-2 mb-2.5">
-            <button type="button" onclick="extendUpdateDays(7)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+7d</button>
-            <button type="button" onclick="extendUpdateDays(14)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+14d</button>
-            <button type="button" onclick="extendUpdateDays(30)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+30d</button>
+          <div class="grid grid-cols-5 gap-1.5 mb-2.5">
+            <button type="button" onclick="extendUpdateHours(6)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+6h</button>
+            <button type="button" onclick="extendUpdateHours(24)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+24h</button>
+            <button type="button" onclick="extendUpdateHours(7 * 24)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+7d</button>
+            <button type="button" onclick="extendUpdateHours(30 * 24)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+30d</button>
             <button type="button" id="btnUpdateForever" onclick="toggleUpdateForever()" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">Forever ∞</button>
           </div>
-          <div id="updateCustomDaysWrap">
-            <input
-              id="updateDurationDays"
-              type="number"
-              min="1"
-              max="36500"
-              class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
-            />
+          <div id="updateCustomDurationWrap" class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="updateDurationDays" class="block text-[11px] text-[#656d76] dark:text-[#8b949e] mb-1">Days</label>
+              <input
+                id="updateDurationDays"
+                type="number"
+                min="0"
+                max="36500"
+                placeholder="0"
+                class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+              />
+            </div>
+            <div>
+              <label for="updateDurationHours" class="block text-[11px] text-[#656d76] dark:text-[#8b949e] mb-1">Hours</label>
+              <input
+                id="updateDurationHours"
+                type="number"
+                min="0"
+                max="87600"
+                placeholder="0"
+                class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+              />
+            </div>
           </div>
           <input id="updateIsForever" type="hidden" value="false" />
         </div>
@@ -875,228 +908,32 @@
 
     function formatDurationCompact(ms) {
       if (!isFinite(ms)) return 'Forever ∞';
-      if (ms <= 0) return '0m';
+      if (ms <= 0) return '0s';
       const totalSec = Math.floor(ms / 1000);
       const d = Math.floor(totalSec / 86400);
       const h = Math.floor((totalSec % 86400) / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
       if (d > 0) return `${d}d ${h}h`;
       if (h > 0) return `${h}h ${m}m`;
-      return `${Math.max(1, m)}m`;
+      return `${m}m ${String(s).padStart(2, '0')}s`;
     }
 
     function formatShortDate(isoStr) {
       if (!isoStr) return '—';
       try {
         const d = new Date(isoStr);
-        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        const datePart = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        const timePart = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        return `${datePart} · ${timePart}`;
       } catch (e) {
         return isoStr;
       }
     }
 
-    function toLocalDayKey(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
     // -------------------------------------------------------------------------
-    // 4. 53-WEEK GITHUB ACTIVITY HEATMAP (SINGLE GREEN & SINGLE GREY)
+    // 4. LOCAL STORAGE, NORMALIZATION & SYNC ORCHESTRATION
     // -------------------------------------------------------------------------
-    function renderBanGithubGraph(ban) {
-      const container = document.getElementById('detailHeatmapContainer');
-      const summaryEl = document.getElementById('detailGraphSummary');
-      if (!container) return;
-
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const todayTime = todayStart.getTime();
-
-      const banStart = new Date(ban.startDate);
-      const banStartDay = new Date(banStart.getFullYear(), banStart.getMonth(), banStart.getDate()).getTime();
-
-      const banEndDay = (!ban.isForever && ban.targetEndDate)
-        ? new Date(
-            new Date(ban.targetEndDate).getFullYear(),
-            new Date(ban.targetEndDate).getMonth(),
-            new Date(ban.targetEndDate).getDate()
-          ).getTime()
-        : todayTime;
-
-      // Start 52 full weeks prior to the Sunday of the current week (53 columns total)
-      const currentSunday = new Date(todayStart);
-      currentSunday.setDate(todayStart.getDate() - todayStart.getDay());
-
-      const gridStart = new Date(currentSunday);
-      gridStart.setDate(currentSunday.getDate() - 52 * 7);
-
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const weeks = [];
-      let activeDaysInYear = 0;
-
-      for (let w = 0; w < 53; w++) {
-        const daysCol = [];
-        for (let d = 0; d < 7; d++) {
-          const cellDate = new Date(gridStart);
-          cellDate.setDate(gridStart.getDate() + w * 7 + d);
-          const cellTime = cellDate.getTime();
-          const isFuture = cellTime > todayTime;
-          const isActive = !isFuture && cellTime >= banStartDay && cellTime <= Math.min(todayTime, banEndDay);
-
-          if (isActive) activeDaysInYear++;
-
-          const dayNum = isActive ? Math.floor((cellTime - banStartDay) / 86400000) + 1 : 0;
-          daysCol.push({
-            date: cellDate,
-            dateLabel: cellDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
-            isFuture,
-            isActive,
-            dayNum
-          });
-        }
-        weeks.push(daysCol);
-      }
-
-      if (summaryEl) {
-        summaryEl.textContent = `${activeDaysInYear} ${activeDaysInYear === 1 ? 'day' : 'days'} banned in the last year`;
-      }
-
-      // Build Month Header Row
-      let lastMonth = -1;
-      let monthHeaderHtml = '<div class="flex items-center mb-1.5 pl-8 text-[10px] text-[#656d76] dark:text-[#8b949e] select-none">';
-      weeks.forEach((col, idx) => {
-        const firstDay = col[0].date;
-        const m = firstDay.getMonth();
-        let label = '';
-        if (m !== lastMonth && idx < 51) {
-          label = monthNames[m];
-          lastMonth = m;
-        }
-        monthHeaderHtml += `<div class="w-[14px] shrink-0 overflow-visible whitespace-nowrap">${label}</div>`;
-      });
-      monthHeaderHtml += '</div>';
-
-      // Build Day Rows (Sun..Sat with Mon, Wed, Fri labels)
-      const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-      let bodyHtml = '<div class="flex items-start">';
-
-      // Left Weekday Labels Column
-      bodyHtml += '<div class="w-8 shrink-0 flex flex-col gap-[3px] pr-1.5 text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] select-none">';
-      for (let d = 0; d < 7; d++) {
-        bodyHtml += `<div class="h-[11px] flex items-center">${dayLabels[d]}</div>`;
-      }
-      bodyHtml += '</div>';
-
-      // 53 Week Columns
-      bodyHtml += '<div class="flex gap-[3px]">';
-      weeks.forEach(col => {
-        bodyHtml += '<div class="flex flex-col gap-[3px]">';
-        col.forEach(cell => {
-          if (cell.isFuture) {
-            bodyHtml += `<div class="gh-cell gh-cell-future"></div>`;
-          } else {
-            const stateClass = cell.isActive ? 'gh-cell-active' : 'gh-cell-inactive';
-            const detailText = cell.isActive ? `Banned • Day ${cell.dayNum}` : 'Inactive';
-            bodyHtml += `<div
-              class="gh-cell ${stateClass} cursor-pointer"
-              data-date="${escapeHtml(cell.dateLabel)}"
-              data-detail="${escapeHtml(detailText)}"
-              onmouseenter="showHeatmapTooltip(event, this)"
-              onmousemove="moveHeatmapTooltip(event)"
-              onmouseleave="hideHeatmapTooltip()"
-              onclick="showHeatmapTooltip(event, this)"
-            ></div>`;
-          }
-        });
-        bodyHtml += '</div>';
-      });
-      bodyHtml += '</div></div>';
-
-      container.innerHTML = monthHeaderHtml + bodyHtml;
-
-      // Auto-scroll horizontally to the most recent weeks (right edge) for mobile convenience
-      const scrollWrapper = document.getElementById('detailHeatmapScroll');
-      if (scrollWrapper) {
-        requestAnimationFrame(() => {
-          scrollWrapper.scrollLeft = scrollWrapper.scrollWidth;
-        });
-      }
-    }
-
-    function showHeatmapTooltip(event, el) {
-      const tooltip = document.getElementById('heatmapTooltip');
-      if (!tooltip || !el) return;
-      document.getElementById('heatmapTooltipDate').textContent = el.dataset.date || '';
-      document.getElementById('heatmapTooltipDetail').textContent = el.dataset.detail || '';
-      tooltip.classList.remove('hidden');
-      positionHeatmapTooltip(event, el);
-    }
-
-    function moveHeatmapTooltip(event) {
-      positionHeatmapTooltip(event, event.currentTarget);
-    }
-
-    function positionHeatmapTooltip(event, el) {
-      const tooltip = document.getElementById('heatmapTooltip');
-      if (!tooltip || tooltip.classList.contains('hidden')) return;
-
-      const rect = tooltip.getBoundingClientRect();
-      let x = event.clientX;
-      let y = event.clientY;
-
-      if ((!x && !y) && el) {
-        const cellRect = el.getBoundingClientRect();
-        x = cellRect.left + cellRect.width / 2;
-        y = cellRect.top;
-      }
-
-      const left = Math.min(
-        Math.max(8, x - rect.width / 2),
-        window.innerWidth - rect.width - 8
-      );
-      const top = Math.max(8, y - rect.height - 10);
-
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-    }
-
-    function hideHeatmapTooltip() {
-      const tooltip = document.getElementById('heatmapTooltip');
-      if (tooltip) tooltip.classList.add('hidden');
-    }
-
-    document.addEventListener('touchstart', (e) => {
-      if (!e.target.closest('.gh-cell')) {
-        hideHeatmapTooltip();
-      }
-    }, { passive: true });
-
-    // -------------------------------------------------------------------------
-    // 5. STORAGE, AUTO-SYNC & LIVE TICKER
-    // -------------------------------------------------------------------------
-    function buildNormalizedExportObject() {
-      const nowMs = Date.now();
-      const normalizedBans = (appState.bans || []).map(ban => {
-        const m = computeBanMetrics(ban, nowMs);
-        return {
-          ...ban,
-          currentStreakDays: m.days,
-          bestStreakDays: m.bestStreakDays
-        };
-      });
-
-      return {
-        app: 'MyBans',
-        version: 2,
-        lastUpdated: appState.lastUpdated || new Date().toISOString(),
-        lastSyncedAt: appState.lastSyncedAt || null,
-        bans: normalizedBans,
-        savedBans: appState.savedBans || []
-      };
-    }
-
     function loadLocalState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_DATA);
@@ -1113,156 +950,335 @@
           };
         }
       } catch (e) {
-        console.error('Failed to load local MyBans state:', e);
+        console.error('Failed to load local state:', e);
       }
     }
 
     function saveLocalState() {
       try {
-        const payload = buildNormalizedExportObject();
-        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(payload));
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(appState));
       } catch (e) {
-        console.error('Failed to save local MyBans state:', e);
+        console.error('Failed to save local state:', e);
       }
     }
 
-    async function persistAndSync(commitMessage = 'Update MyBans') {
+    function buildNormalizedExportObject() {
+      const nowMs = Date.now();
+      const normalizedBans = (appState.bans || []).map(ban => {
+        const m = computeBanMetrics(ban, nowMs);
+        return {
+          ...ban,
+          currentStreakDays: m.days,
+          bestStreakDays: m.bestStreakDays
+        };
+      });
+
+      return {
+        app: 'MyBans',
+        version: 2,
+        lastUpdated: appState.lastUpdated || new Date().toISOString(),
+        bans: normalizedBans,
+        savedBans: Array.isArray(appState.savedBans) ? appState.savedBans : []
+      };
+    }
+
+    async function persistAndSync(commitMessage = 'Update mybans.json') {
       appState.lastUpdated = new Date().toISOString();
       hasUnsyncedLocalChanges = true;
       saveLocalState();
+      updateSyncStatusUI();
 
       if (isGithubConfigured()) {
         await pushToGithub(false, commitMessage);
       }
     }
 
+    // -------------------------------------------------------------------------
+    // 5. LIVE 1-SECOND TICKER & AUTO-SYNC LISTENERS
+    // -------------------------------------------------------------------------
     function startLiveTicker() {
       if (liveTickerInterval) clearInterval(liveTickerInterval);
-      liveTickerInterval = setInterval(async () => {
-        const nowMs = Date.now();
-        let hasNewlyCompleted = false;
 
-        appState.bans.forEach(ban => {
+      liveTickerInterval = setInterval(() => {
+        const nowMs = Date.now();
+        let anyCompleted = false;
+
+        (appState.bans || []).forEach(ban => {
           const m = computeBanMetrics(ban, nowMs);
           if (m.isCompleted) {
-            hasNewlyCompleted = true;
-            return;
+            anyCompleted = true;
           }
 
-          const timerEl = document.getElementById(`card-timer-${ban.id}`);
-          const remEl = document.getElementById(`card-rem-${ban.id}`);
-          const barEl = document.getElementById(`card-bar-${ban.id}`);
-
+          const timerEl = document.querySelector(`[data-ban-timer="${ban.id}"]`);
           if (timerEl) {
             timerEl.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
           }
+
+          const remEl = document.querySelector(`[data-ban-remaining="${ban.id}"]`);
           if (remEl) {
             remEl.textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
           }
-          if (barEl) {
-            barEl.style.width = `${m.progressPct.toFixed(2)}%`;
+
+          const progEl = document.querySelector(`[data-ban-progress="${ban.id}"]`);
+          if (progEl) {
+            progEl.style.width = `${m.progressPct.toFixed(2)}%`;
           }
         });
 
+        // Also update open Detail Modal live timer if visible
         const detailModal = document.getElementById('modalBanDetail');
         if (detailModal && !detailModal.classList.contains('hidden')) {
-          const detailId = document.getElementById('detailBanId')?.value;
-          const activeBan = appState.bans.find(b => b.id === detailId);
+          const activeDetailId = document.getElementById('detailBanId')?.value;
+          const activeBan = (appState.bans || []).find(b => b.id === activeDetailId);
           if (activeBan) {
             const m = computeBanMetrics(activeBan, nowMs);
             const dTimer = document.getElementById('detailLiveTimer');
             const dRem = document.getElementById('detailRemainingText');
-            const dBar = document.getElementById('detailProgressBar');
-            if (dTimer) dTimer.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-            if (dRem) dRem.textContent = activeBan.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-            if (dBar) dBar.style.width = `${m.progressPct.toFixed(2)}%`;
+            const dProg = document.getElementById('detailProgressBar');
+            if (dTimer) {
+              dTimer.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+            }
+            if (dRem) {
+              dRem.textContent = activeBan.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+            }
+            if (dProg) {
+              dProg.style.width = `${m.progressPct.toFixed(2)}%`;
+            }
           }
         }
 
-        if (hasNewlyCompleted) {
-          await checkFinishedBans(true);
+        if (anyCompleted && !isSyncInProgress) {
+          checkFinishedBans(true);
         }
       }, 1000);
     }
 
     function startAutoSyncListeners() {
-      document.addEventListener('visibilitychange', async () => {
+      document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          await smartSyncGithub(false, false);
-          await checkFinishedBans(true);
+          smartSyncGithub(false, false);
         }
       });
 
-      window.addEventListener('online', async () => {
-        if (isGithubConfigured() && hasUnsyncedLocalChanges) {
-          await smartSyncGithub(false, false);
+      window.addEventListener('focus', () => {
+        if (isGithubConfigured()) {
+          smartSyncGithub(false, false);
         }
       });
+
+      window.addEventListener('resize', hideHeatmapTooltip);
+      const heatmapScrollEl = document.getElementById('detailHeatmapScroll');
+      if (heatmapScrollEl) {
+        heatmapScrollEl.addEventListener('scroll', hideHeatmapTooltip, { passive: true });
+      }
     }
 
     // -------------------------------------------------------------------------
-    // 6. HOME PAGE RENDERING
+    // 6. HOME CARDS RENDERER & 53-WEEK SINGLE-GREEN/GREY GITHUB GRAPH
     // -------------------------------------------------------------------------
     function renderAll() {
-      renderBansGrid();
       updateSyncStatusUI();
-    }
 
-    function renderBansGrid() {
       const grid = document.getElementById('bansGrid');
       const emptyState = document.getElementById('emptyState');
       if (!grid || !emptyState) return;
 
-      if (!appState.bans || appState.bans.length === 0) {
+      const bans = Array.isArray(appState.bans) ? appState.bans : [];
+      if (bans.length === 0) {
         grid.innerHTML = '';
-        grid.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
       }
 
       emptyState.classList.add('hidden');
-      grid.classList.remove('hidden');
       const nowMs = Date.now();
 
-      grid.innerHTML = appState.bans.map(ban => {
+      grid.innerHTML = bans.map(ban => {
         const m = computeBanMetrics(ban, nowMs);
         const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
         const remStr = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+        const safeId = escapeHtml(ban.id);
+        const safeName = escapeHtml(ban.name);
 
         return `
           <button
             type="button"
-            onclick="openBanDetailModal('${escapeHtml(ban.id)}')"
-            class="w-full text-left p-4 sm:p-5 rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] active:scale-[0.99] transition shadow-xs group"
+            onclick="openBanDetailModal('${safeId}')"
+            class="w-full text-left rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] p-4 sm:p-5 transition active:scale-[0.99] shadow-xs flex flex-col justify-between gap-3.5"
           >
-            <div class="flex items-start justify-between gap-3 mb-3">
-              <h2 class="text-base sm:text-lg font-semibold leading-snug break-words group-hover:text-[#2ea043] transition-colors">
-                ${escapeHtml(ban.name)}
-              </h2>
-              <svg class="w-4 h-4 mt-1 shrink-0 text-[#656d76] dark:text-[#8b949e] group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </div>
-
-            <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-2.5">
-              <span id="card-timer-${escapeHtml(ban.id)}" class="text-sm sm:text-base font-mono font-semibold text-[#2ea043] tabular-nums">
-                ${timerStr}
-              </span>
-              <span id="card-rem-${escapeHtml(ban.id)}" class="text-xs font-medium text-[#656d76] dark:text-[#8b949e]">
-                ${remStr}
+            <div class="flex items-start justify-between gap-3 w-full">
+              <h2 class="text-base sm:text-lg font-semibold leading-snug break-words min-w-0">${safeName}</h2>
+              <span class="shrink-0 text-xs font-medium text-[#656d76] dark:text-[#8b949e]" data-ban-remaining="${safeId}">
+                ${escapeHtml(remStr)}
               </span>
             </div>
 
-            <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
-              <div
-                id="card-bar-${escapeHtml(ban.id)}"
-                class="h-full bg-[#2ea043] rounded-full transition-all duration-500"
-                style="width: ${m.progressPct.toFixed(2)}%"
-              ></div>
+            <div class="w-full space-y-2">
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="text-[11px] uppercase tracking-wider text-[#656d76] dark:text-[#8b949e]">Passed</span>
+                <span class="text-sm sm:text-base font-mono font-semibold text-[#2ea043] tabular-nums" data-ban-timer="${safeId}">
+                  ${timerStr}
+                </span>
+              </div>
+
+              <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
+                <div
+                  data-ban-progress="${safeId}"
+                  class="h-full bg-[#2ea043] rounded-full transition-all duration-500"
+                  style="width: ${m.progressPct.toFixed(2)}%"
+                ></div>
+              </div>
             </div>
           </button>
         `;
       }).join('');
+    }
+
+    function renderBanGithubGraph(ban) {
+      const container = document.getElementById('detailHeatmapContainer');
+      const summaryEl = document.getElementById('detailGraphSummary');
+      const scrollWrapper = document.getElementById('detailHeatmapScroll');
+      if (!container) return;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const banStart = new Date(ban.startDate);
+      banStart.setHours(0, 0, 0, 0);
+
+      // Start on the Sunday 52 weeks prior to this week's Sunday (53 columns total)
+      const currentWeekSunday = new Date(today);
+      currentWeekSunday.setDate(today.getDate() - today.getDay());
+
+      const gridStart = new Date(currentWeekSunday);
+      gridStart.setDate(currentWeekSunday.getDate() - 52 * 7);
+
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const weeks = [];
+      let activeDaysInYear = 0;
+
+      for (let w = 0; w < 53; w++) {
+        const weekDays = [];
+        for (let d = 0; d < 7; d++) {
+          const cellDate = new Date(gridStart);
+          cellDate.setDate(gridStart.getDate() + w * 7 + d);
+
+          const isFuture = cellDate.getTime() > today.getTime();
+          const isActive = !isFuture && cellDate.getTime() >= banStart.getTime();
+          if (isActive) activeDaysInYear++;
+
+          weekDays.push({
+            date: cellDate,
+            isFuture,
+            isActive
+          });
+        }
+        weeks.push(weekDays);
+      }
+
+      if (summaryEl) {
+        summaryEl.textContent = `${activeDaysInYear} day${activeDaysInYear === 1 ? '' : 's'} banned in the last year`;
+      }
+
+      // Build Month Labels Row aligned with each week column
+      let lastMonth = -1;
+      const monthHeaderHtml = weeks.map((week, idx) => {
+        const firstValidDay = week.find(day => !day.isFuture) || week[0];
+        const m = firstValidDay.date.getMonth();
+        let label = '';
+        if (m !== lastMonth && (idx === 0 || firstValidDay.date.getDate() <= 7)) {
+          label = monthNames[m];
+          lastMonth = m;
+        }
+        return `<div class="w-[11px] text-[10px] leading-none text-[#656d76] dark:text-[#8b949e] overflow-visible whitespace-nowrap">${label}</div>`;
+      }).join('');
+
+      // Build 53 Week Columns (Single Green #2ea043 & Single Grey only)
+      const columnsHtml = weeks.map(week => {
+        const cellsHtml = week.map(day => {
+          if (day.isFuture) {
+            return `<div class="gh-cell gh-cell-future"></div>`;
+          }
+          const dateLabel = day.date.toLocaleDateString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+          const statusLabel = day.isActive ? 'Banned' : 'Inactive';
+          const cellClass = day.isActive ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
+
+          return `<div
+            class="${cellClass} cursor-pointer"
+            data-date="${escapeHtml(dateLabel)}"
+            data-status="${statusLabel}"
+            onmouseenter="showHeatmapTooltip(event, this)"
+            onmouseleave="hideHeatmapTooltip()"
+            onclick="event.stopPropagation(); showHeatmapTooltip(event, this)"
+          ></div>`;
+        }).join('');
+
+        return `<div class="flex flex-col gap-[3px]">${cellsHtml}</div>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="inline-flex flex-col gap-1.5 select-none">
+          <div class="flex items-center gap-[3px] pl-7">
+            ${monthHeaderHtml}
+          </div>
+          <div class="flex items-start gap-1.5">
+            <div class="w-5 flex flex-col gap-[3px] text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] pt-[1px]">
+              <span class="h-[11px] opacity-0">Sun</span>
+              <span class="h-[11px]">Mon</span>
+              <span class="h-[11px] opacity-0">Tue</span>
+              <span class="h-[11px]">Wed</span>
+              <span class="h-[11px] opacity-0">Thu</span>
+              <span class="h-[11px]">Fri</span>
+              <span class="h-[11px] opacity-0">Sat</span>
+            </div>
+            <div class="flex items-start gap-[3px]">
+              ${columnsHtml}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Auto-scroll to most recent weeks on mobile
+      if (scrollWrapper) {
+        requestAnimationFrame(() => {
+          scrollWrapper.scrollLeft = scrollWrapper.scrollWidth;
+        });
+      }
+    }
+
+    function showHeatmapTooltip(event, cellEl) {
+      const tooltip = document.getElementById('heatmapTooltip');
+      const dateEl = document.getElementById('heatmapTooltipDate');
+      const detailEl = document.getElementById('heatmapTooltipDetail');
+      if (!tooltip || !cellEl) return;
+
+      dateEl.textContent = cellEl.dataset.date || '';
+      detailEl.textContent = cellEl.dataset.status || '';
+      tooltip.classList.remove('hidden');
+
+      const rect = cellEl.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+
+      let left = rect.left + rect.width / 2 - tipRect.width / 2;
+      let top = rect.top - tipRect.height - 8;
+
+      left = Math.max(8, Math.min(window.innerWidth - tipRect.width - 8, left));
+      if (top < 8) {
+        top = rect.bottom + 8;
+      }
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+
+    function hideHeatmapTooltip() {
+      const tooltip = document.getElementById('heatmapTooltip');
+      if (tooltip) tooltip.classList.add('hidden');
     }
 
     // -------------------------------------------------------------------------
@@ -1270,7 +1286,7 @@
     // -------------------------------------------------------------------------
     function openStartBanModal() {
       document.getElementById('formStartBan').reset();
-      selectStartPreset(30, false);
+      selectStartPreset(30, 0, false);
       document.getElementById('modalStartBan').classList.remove('hidden');
       setTimeout(() => document.getElementById('inputBanName')?.focus(), 80);
     }
@@ -1279,33 +1295,36 @@
       document.getElementById('modalStartBan').classList.add('hidden');
     }
 
-    function selectStartPreset(days, isForever) {
+    function selectStartPreset(days, hours, isForever) {
       document.getElementById('inputStartForever').value = isForever ? 'true' : 'false';
-      const customWrap = document.getElementById('startCustomDaysWrap');
+      const customWrap = document.getElementById('startCustomDurationWrap');
       const daysInput = document.getElementById('inputStartDays');
+      const hoursInput = document.getElementById('inputStartHours');
 
       if (isForever) {
         customWrap.classList.add('hidden');
       } else {
         customWrap.classList.remove('hidden');
         daysInput.value = days;
+        hoursInput.value = hours;
       }
 
+      const targetKey = isForever ? 'forever' : `${days}d${hours}h`;
       document.querySelectorAll('.start-preset-btn').forEach(btn => {
-        const key = btn.dataset.startPreset;
-        const active = (isForever && key === 'forever') || (!isForever && Number(key) === days);
+        const active = btn.dataset.startPreset === targetKey;
         btn.className = active
           ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
           : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
       });
     }
 
-    function onStartDaysManualInput() {
+    function onStartDurationManualInput() {
       document.getElementById('inputStartForever').value = 'false';
-      const val = Number(document.getElementById('inputStartDays').value);
+      const d = Math.max(0, parseInt(document.getElementById('inputStartDays').value, 10) || 0);
+      const h = Math.max(0, parseInt(document.getElementById('inputStartHours').value, 10) || 0);
+      const currentKey = `${d}d${h}h`;
       document.querySelectorAll('.start-preset-btn').forEach(btn => {
-        const key = btn.dataset.startPreset;
-        const active = key !== 'forever' && Number(key) === val;
+        const active = btn.dataset.startPreset === currentKey;
         btn.className = active
           ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
           : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
@@ -1318,13 +1337,28 @@
       if (!name) return;
 
       const isForever = document.getElementById('inputStartForever').value === 'true';
-      const durationDays = isForever ? null : Math.max(1, parseInt(document.getElementById('inputStartDays').value, 10) || 30);
-      const reason = document.getElementById('inputBanReason').value.trim();
+      let durationDays = null;
+      let durationHours = null;
+      let totalHours = null;
 
+      if (!isForever) {
+        const rawDays = Math.max(0, parseInt(document.getElementById('inputStartDays').value, 10) || 0);
+        const rawHours = Math.max(0, parseInt(document.getElementById('inputStartHours').value, 10) || 0);
+        totalHours = rawDays * 24 + rawHours;
+        if (totalHours < 1) {
+          showToast('Please enter at least 1 hour or select Forever ∞');
+          document.getElementById('inputStartHours')?.focus();
+          return;
+        }
+        durationDays = Math.floor(totalHours / 24);
+        durationHours = totalHours % 24;
+      }
+
+      const reason = document.getElementById('inputBanReason').value.trim();
       const now = new Date();
       const targetEndDate = isForever
         ? null
-        : new Date(now.getTime() + durationDays * 86400000).toISOString();
+        : new Date(now.getTime() + totalHours * 3600000).toISOString();
 
       const newBan = {
         id: `ban_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -1333,6 +1367,7 @@
         startDate: now.toISOString(),
         targetEndDate,
         durationDays,
+        durationHours,
         isForever,
         currentStreakDays: 0,
         bestStreakDays: 0
@@ -1391,8 +1426,20 @@
 
       const isForever = Boolean(ban.isForever);
       document.getElementById('updateIsForever').value = isForever ? 'true' : 'false';
-      const currentDays = ban.durationDays || Math.max(1, computeBanMetrics(ban).days + 7);
-      document.getElementById('updateDurationDays').value = currentDays;
+
+      let totalHours = 0;
+      if (ban.targetEndDate && ban.startDate) {
+        const diffMs = Math.max(0, new Date(ban.targetEndDate).getTime() - new Date(ban.startDate).getTime());
+        totalHours = Math.round(diffMs / 3600000);
+      } else if (typeof ban.durationDays === 'number' || typeof ban.durationHours === 'number') {
+        totalHours = (ban.durationDays || 0) * 24 + (ban.durationHours || 0);
+      }
+      if (totalHours < 1) {
+        totalHours = Math.max(1, (computeBanMetrics(ban).days + 1) * 24);
+      }
+
+      document.getElementById('updateDurationDays').value = Math.floor(totalHours / 24);
+      document.getElementById('updateDurationHours').value = totalHours % 24;
 
       syncUpdateForeverUI(isForever);
       document.getElementById('modalUpdateBan').classList.remove('hidden');
@@ -1403,7 +1450,7 @@
     }
 
     function syncUpdateForeverUI(isForever) {
-      const wrap = document.getElementById('updateCustomDaysWrap');
+      const wrap = document.getElementById('updateCustomDurationWrap');
       const btn = document.getElementById('btnUpdateForever');
       if (isForever) {
         wrap.classList.add('hidden');
@@ -1414,12 +1461,16 @@
       }
     }
 
-    function extendUpdateDays(addDays) {
+    function extendUpdateHours(addHours) {
       document.getElementById('updateIsForever').value = 'false';
       syncUpdateForeverUI(false);
-      const input = document.getElementById('updateDurationDays');
-      const current = parseInt(input.value, 10) || 0;
-      input.value = current + addDays;
+      const daysInput = document.getElementById('updateDurationDays');
+      const hoursInput = document.getElementById('updateDurationHours');
+      const curDays = Math.max(0, parseInt(daysInput.value, 10) || 0);
+      const curHours = Math.max(0, parseInt(hoursInput.value, 10) || 0);
+      const nextTotalHours = curDays * 24 + curHours + addHours;
+      daysInput.value = Math.floor(nextTotalHours / 24);
+      hoursInput.value = nextTotalHours % 24;
     }
 
     function toggleUpdateForever() {
@@ -1440,20 +1491,37 @@
       if (!newName) return;
 
       const isForever = document.getElementById('updateIsForever').value === 'true';
-      const durationDays = isForever ? null : Math.max(1, parseInt(document.getElementById('updateDurationDays').value, 10) || 30);
+      let durationDays = null;
+      let durationHours = null;
+      let totalHours = null;
+
+      if (!isForever) {
+        const rawDays = Math.max(0, parseInt(document.getElementById('updateDurationDays').value, 10) || 0);
+        const rawHours = Math.max(0, parseInt(document.getElementById('updateDurationHours').value, 10) || 0);
+        totalHours = rawDays * 24 + rawHours;
+        if (totalHours < 1) {
+          showToast('Please enter at least 1 hour or select Forever ∞');
+          document.getElementById('updateDurationHours')?.focus();
+          return;
+        }
+        durationDays = Math.floor(totalHours / 24);
+        durationHours = totalHours % 24;
+      }
+
       const newReason = document.getElementById('updateBanReason').value.trim();
 
       // Keep original startDate and active streak intact; only recalculate targetEndDate
       const startMs = new Date(ban.startDate).getTime();
       const targetEndDate = isForever
         ? null
-        : new Date(startMs + durationDays * 86400000).toISOString();
+        : new Date(startMs + totalHours * 3600000).toISOString();
 
       appState.bans[banIndex] = {
         ...ban,
         name: newName,
         reason: newReason,
         durationDays,
+        durationHours,
         isForever,
         targetEndDate
       };
@@ -1512,11 +1580,12 @@
       appState.bans.forEach(ban => {
         const m = computeBanMetrics(ban, nowMs);
         if (m.isCompleted) {
+          const achievedDays = Math.max(m.days, ban.durationDays || 0);
           newlyFinished.push({
             ...ban,
             endedAt: ban.targetEndDate || nowIso,
-            finalStreakDays: ban.durationDays || m.days,
-            bestStreakDays: Math.max(m.bestStreakDays, ban.durationDays || m.days),
+            finalStreakDays: achievedDays,
+            bestStreakDays: Math.max(m.bestStreakDays, achievedDays),
             status: 'completed'
           });
         } else {
