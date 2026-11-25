@@ -2,17 +2,24 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0d1117" />
-  <title>MyBans — Reclaim Your Focus & Life</title>
-  <!-- Embedded SVG Favicon (Works offline, on GitHub Pages, and when installed as an app) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232ea043'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'/%3E%3C/g%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232ea043'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'/%3E%3C/g%3E%3C/svg%3E" />
-  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1117" id="metaThemeColor" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MyBans" />
+  <title>MyBans</title>
+
+  <!-- Self-Contained Inline SVG Favicon & Apple Touch Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232ea043'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23ffffff' stroke-width='5.5'/%3E%3Cline x1='19.3' y1='19.3' x2='44.7' y2='44.7' stroke='%23ffffff' stroke-width='5.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232ea043'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23ffffff' stroke-width='5.5'/%3E%3Cline x1='19.3' y1='19.3' x2='44.7' y2='44.7' stroke='%23ffffff' stroke-width='5.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
-  <!-- Tailwind CSS CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -20,288 +27,327 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          }
-        }
-      }
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        },
+      },
     };
   </script>
+
   <style>
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      transition: background-color 0.25s ease, color 0.25s ease;
+    /* Base Mobile & Cross-Device Reset */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
-    .tabular-nums {
-      font-variant-numeric: tabular-nums;
+
+    /* Safe-Area Insets for Modern Phones (Notches & Home Bars) */
+    .safe-top {
+      padding-top: max(0.75rem, env(safe-area-inset-top));
     }
-    @keyframes pulse-ring {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.55; transform: scale(1.15); }
+    .safe-bottom {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
-    .live-dot {
-      animation: pulse-ring 2s infinite ease-in-out;
+    .safe-fab-bottom {
+      bottom: max(1.25rem, env(safe-area-inset-bottom));
     }
-    ::-webkit-scrollbar {
-      width: 6px;
+
+    /* Custom Scrollbar for 53-Week Heatmap */
+    .heatmap-scroll {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .heatmap-scroll::-webkit-scrollbar {
       height: 6px;
     }
-    ::-webkit-scrollbar-track {
+    .heatmap-scroll::-webkit-scrollbar-track {
       background: transparent;
     }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.35);
+    .heatmap-scroll::-webkit-scrollbar-thumb {
+      background: rgba(139, 148, 158, 0.3);
       border-radius: 9999px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(148, 163, 184, 0.55);
-    }
+
+    /* Strictly Single Green & Single Grey Heatmap Cells */
     .gh-cell {
-      transition: transform 0.12s ease, outline-color 0.12s ease;
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      transition: transform 0.1s ease, outline 0.1s ease;
     }
-    .gh-cell:hover {
+    .gh-cell:hover,
+    .gh-cell:active {
       transform: scale(1.25);
+      outline: 1.5px solid rgba(139, 148, 158, 0.7);
       z-index: 10;
-      outline: 2px solid #2ea043;
-      outline-offset: 1px;
+    }
+    .gh-cell-inactive {
+      background-color: #ebedf0;
+    }
+    .dark .gh-cell-inactive {
+      background-color: #161b22;
+    }
+    .gh-cell-active {
+      background-color: #2ea043;
+    }
+    .gh-cell-future {
+      background-color: transparent;
+      pointer-events: none;
+    }
+
+    /* Smooth Mobile Bottom-Sheet Entrance */
+    @keyframes sheetSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .modal-sheet {
+      animation: sheetSlideUp 0.18s ease-out;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-[#0d1117] dark:text-slate-100 min-h-screen flex flex-col selection:bg-emerald-600 selection:text-white">
 
-  <!-- Minimalist Top Navigation Header -->
-  <header class="sticky top-0 z-30 backdrop-blur-md bg-white/85 dark:bg-[#0d1117]/85 border-b border-slate-200/80 dark:border-slate-800/80">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-[#2ea043] flex items-center justify-center text-white shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+<body class="min-h-screen bg-[#f6f8fa] text-[#1f2328] dark:bg-[#0d1117] dark:text-[#e6edf3] transition-colors duration-200 selection:bg-[#2ea043]/25">
+
+  <!-- ===================================================================== -->
+  <!-- TOP NAVIGATION BAR (Responsive Mobile + Desktop)                      -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-30 border-b border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff]/90 dark:bg-[#0d1117]/90 backdrop-blur-md safe-top pb-3">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#2ea043] flex items-center justify-center shrink-0 shadow-sm">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <line x1="6.3" y1="6.3" x2="17.7" y2="17.7"></line>
           </svg>
         </div>
-        <h1 class="text-lg font-bold tracking-tight">MyBans</h1>
+        <span class="font-bold text-lg sm:text-xl tracking-tight truncate">MyBans</span>
       </div>
 
-      <!-- Minimal Header Controls -->
-      <div class="flex items-center gap-2">
-        <!-- GitHub Sync Status Pill -->
-        <button id="btnGithubStatus" onclick="openGithubModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition cursor-pointer" title="Configure GitHub Backend Sync">
-          <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <svg class="w-4 h-4 text-slate-700 dark:text-slate-300" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+      <!-- Right Controls -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- GitHub Sync Pill -->
+        <button
+          id="btnOpenGithub"
+          type="button"
+          onclick="openGithubModal()"
+          class="inline-flex items-center gap-2 px-3 py-2 min-h-[40px] rounded-xl text-xs sm:text-sm font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#161b22] hover:bg-[#eaeef2] dark:hover:bg-[#21262d] active:scale-[0.98] transition"
+          title="GitHub JSON Backend Settings"
+        >
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+          <svg class="w-4 h-4 shrink-0 opacity-85" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
           </svg>
-          <span id="syncStatusText" class="hidden sm:inline">Local JSON</span>
+          <span id="syncLabel" class="max-w-[95px] sm:max-w-[160px] truncate">Local JSON</span>
         </button>
 
-        <!-- Saved Archive & JSON Viewer -->
-        <button onclick="openJsonModal()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition cursor-pointer" title="Saved Bans & JSON Data">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        <!-- Theme Toggle Button -->
+        <button
+          id="btnToggleTheme"
+          type="button"
+          onclick="toggleTheme()"
+          class="w-10 h-10 rounded-xl flex items-center justify-center border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#161b22] hover:bg-[#eaeef2] dark:hover:bg-[#21262d] active:scale-[0.97] transition"
+          aria-label="Toggle Dark or Light Mode"
+          title="Toggle Dark / Light Mode"
+        >
+          <!-- Sun Icon (shown in Dark Mode) -->
+          <svg id="iconSun" class="w-4 h-4 hidden dark:block text-[#e6edf3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <!-- Moon Icon (shown in Light Mode) -->
+          <svg id="iconMoon" class="w-4 h-4 block dark:hidden text-[#1f2328]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
           </svg>
         </button>
 
-        <!-- Dark / Light Theme Toggle -->
-        <button id="btnThemeToggle" onclick="toggleTheme()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition cursor-pointer" title="Toggle Theme">
-          <svg id="iconSun" class="w-4 h-4 hidden dark:block text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        <!-- Desktop Start Ban Button -->
+        <button
+          type="button"
+          onclick="openStartBanModal()"
+          class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 min-h-[40px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          <svg id="iconMoon" class="w-4 h-4 block dark:hidden text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-          </svg>
-        </button>
-
-        <!-- Primary Action: Start a Ban -->
-        <button onclick="openAddBanModal()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] text-white text-xs sm:text-sm font-semibold transition cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span>Start Ban</span>
+          <span>Start a Ban</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container: ONLY Active Bans on Home Page -->
-  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8">
-    <!-- Minimalist Bans List -->
-    <section id="bansGrid" class="space-y-3.5">
-      <!-- Active ban cards rendered dynamically via JS -->
-    </section>
+  <!-- ===================================================================== -->
+  <!-- MAIN HOME VIEW (Minimalist Active Bans List Only)                     -->
+  <!-- ===================================================================== -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-28 sm:pb-12">
+    <!-- Toast Banner (Non-blocking feedback) -->
+    <div
+      id="toastBanner"
+      class="hidden mb-4 px-4 py-3 rounded-xl text-xs sm:text-sm font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-sm flex items-center justify-between gap-3"
+      role="status"
+    >
+      <span id="toastMessage" class="leading-snug"></span>
+      <button type="button" onclick="hideToast()" class="text-xs opacity-60 hover:opacity-100 px-2 py-1">✕</button>
+    </div>
 
-    <!-- Minimalist Empty State -->
-    <section id="emptyState" class="hidden py-20 px-4 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-      <h2 class="text-lg font-semibold mb-1.5">No active bans</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">
-        Start a ban to track your streak automatically, or connect GitHub to load your existing bans.
-      </p>
-      <div class="flex flex-wrap items-center justify-center gap-2.5">
-        <button onclick="openAddBanModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2ea043] hover:bg-[#2c974b] text-white text-sm font-semibold transition cursor-pointer">
-          <span>+ Start a Ban</span>
-        </button>
-        <button onclick="openGithubModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium transition cursor-pointer">
-          <span>Sync from GitHub</span>
-        </button>
+    <!-- Active Bans Grid -->
+    <div id="bansGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4"></div>
+
+    <!-- Empty State -->
+    <div
+      id="emptyState"
+      class="hidden rounded-2xl border border-dashed border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22]/60 p-8 sm:p-12 text-center max-w-md mx-auto mt-6 sm:mt-10"
+    >
+      <div class="w-12 h-12 rounded-2xl bg-[#2ea043]/15 text-[#2ea043] flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <line x1="6.3" y1="6.3" x2="17.7" y2="17.7"></line>
+        </svg>
       </div>
-    </section>
+      <h2 class="text-base sm:text-lg font-semibold mb-1.5">No Active Bans</h2>
+      <p class="text-xs sm:text-sm text-[#656d76] dark:text-[#8b949e] mb-6 leading-relaxed">
+        Start a ban to track your streak automatically. Finished and cancelled bans are archived in your JSON file.
+      </p>
+      <button
+        type="button"
+        onclick="openStartBanModal()"
+        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Start a Ban</span>
+      </button>
+    </div>
   </main>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 1: BAN DETAILS MODAL (CLICKED FROM HOME PAGE)                   -->
-  <!-- ===================================================================== -->
-  <div id="modalBanDetail" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
-    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-        <div class="min-w-0">
-          <span id="detailStatusBadge" class="inline-block text-[11px] font-semibold uppercase tracking-wider text-[#2ea043] mb-0.5">Active Ban</span>
-          <h3 id="detailBanName" class="text-xl font-bold truncate"></h3>
-        </div>
-        <button onclick="closeModal('modalBanDetail')" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto space-y-5">
-        <input type="hidden" id="detailBanId" />
-
-        <!-- Live Streak & Key Metrics -->
-        <div class="p-4 rounded-xl bg-slate-50 dark:bg-[#0d1117] border border-slate-200/80 dark:border-slate-800 space-y-3">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <div>
-              <span class="text-[11px] uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400 block">Current Streak</span>
-              <span id="detailLiveTimer" class="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[#2ea043]">0d 00h 00m 00s</span>
-            </div>
-            <span id="detailRemainingText" class="text-xs font-medium text-slate-500 dark:text-slate-400"></span>
-          </div>
-
-          <!-- Progress Bar (Strictly Green & Grey) -->
-          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-            <div id="detailProgressBar" class="h-full rounded-full bg-[#2ea043] transition-all duration-500" style="width: 0%"></div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 pt-1 text-xs">
-            <div>
-              <span class="text-slate-500 dark:text-slate-400 block text-[11px]">Start Date</span>
-              <span id="detailStartDate" class="font-mono font-medium"></span>
-            </div>
-            <div>
-              <span class="text-slate-500 dark:text-slate-400 block text-[11px]">Target End</span>
-              <span id="detailEndDate" class="font-mono font-medium"></span>
-            </div>
-            <div>
-              <span class="text-slate-500 dark:text-slate-400 block text-[11px]">Best Streak</span>
-              <span id="detailBestStreak" class="font-mono font-medium text-[#2ea043]"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Why I Banned This -->
-        <div id="detailWhyWrap" class="p-4 rounded-xl bg-slate-50 dark:bg-[#0d1117] border border-slate-200/80 dark:border-slate-800 space-y-1">
-          <span class="text-[11px] uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400 block">Why I Banned This</span>
-          <p id="detailWhyText" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"></p>
-        </div>
-
-        <!-- 53-Week GitHub Activity Graph (Strictly Single Green & Single Grey) -->
-        <div class="space-y-1.5">
-          <span class="text-[11px] uppercase tracking-wider font-medium text-slate-500 dark:text-slate-400 block">Activity History</span>
-          <div id="detailHeatmapContainer"></div>
-        </div>
-
-        <!-- Inline Cancel Confirmation Box -->
-        <div id="cancelConfirmBox" class="hidden p-4 rounded-xl bg-slate-100 dark:bg-[#0d1117] border border-slate-300 dark:border-slate-700 space-y-3">
-          <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-            Cancel this ban now? Your progress will be <strong>saved in <code class="font-mono">mybans.json</code></strong> as cancelled and removed from the home page.
-          </p>
-          <div class="flex items-center justify-end gap-2">
-            <button type="button" onclick="toggleCancelConfirm(false)" class="px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition cursor-pointer">
-              Keep Active
-            </button>
-            <button type="button" onclick="confirmCancelBan()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 hover:opacity-90 transition cursor-pointer">
-              Confirm Cancel & Save
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal Footer: ONLY Update & Cancel Actions -->
-      <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-        <button type="button" onclick="toggleCancelConfirm(true)" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-          Cancel Ban
-        </button>
-        <button type="button" onclick="openUpdateFromDetail()" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
-          Update Ban
-        </button>
-      </div>
-    </div>
+  <!-- Mobile Thumb-Friendly Floating Action Button -->
+  <div class="sm:hidden fixed right-4 left-4 safe-fab-bottom z-20 pointer-events-none flex justify-end">
+    <button
+      type="button"
+      onclick="openStartBanModal()"
+      class="pointer-events-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 min-h-[48px] rounded-2xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.97] transition shadow-lg shadow-black/25"
+    >
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span>Start a Ban</span>
+    </button>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 2: START OR UPDATE BAN MODAL                                    -->
+  <!-- FLOATING HEATMAP CELL TOOLTIP                                         -->
   <!-- ===================================================================== -->
-  <div id="modalBanForm" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <h3 id="modalBanFormTitle" class="text-base font-bold">Start a Ban</h3>
-        <button onclick="closeModal('modalBanForm')" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-      <form id="banForm" onsubmit="handleSaveBan(event)" class="p-6 space-y-4">
-        <input type="hidden" id="editBanId" />
+  <div
+    id="heatmapTooltip"
+    class="hidden fixed z-50 pointer-events-none px-2.5 py-1.5 rounded-lg text-xs bg-[#1f2328] dark:bg-[#21262d] text-white border border-[#30363d] shadow-lg whitespace-nowrap"
+  >
+    <div id="heatmapTooltipDate" class="font-semibold"></div>
+    <div id="heatmapTooltipDetail" class="text-[11px] text-[#8b949e]"></div>
+  </div>
 
-        <!-- Name -->
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: START A NEW BAN                                              -->
+  <!-- ===================================================================== -->
+  <div
+    id="modalStartBan"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    onclick="if(event.target === this) closeStartBanModal()"
+  >
+    <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <!-- Mobile Bottom Sheet Drag Indicator -->
+      <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
+      </div>
+
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-center justify-between shrink-0">
+        <h3 class="text-base sm:text-lg font-semibold">Start a Ban</h3>
+        <button
+          type="button"
+          onclick="closeStartBanModal()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#656d76] dark:text-[#8b949e] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d]"
+          aria-label="Close"
+        >✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="formStartBan" onsubmit="handleStartBanSubmit(event)" class="p-5 overflow-y-auto overscroll-contain flex-1 space-y-4">
         <div>
-          <label for="banName" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+          <label for="inputBanName" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
             What are you banning?
           </label>
-          <input id="banName" type="text" required placeholder="e.g., Sugar, Social Media, Late Nights..." class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043] transition" />
+          <input
+            id="inputBanName"
+            type="text"
+            required
+            maxlength="80"
+            placeholder="e.g., Sugar, Late-night scrolling, Toxic person..."
+            class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+          />
         </div>
 
-        <!-- Why I Banned This -->
         <div>
-          <label for="banWhy" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-            Why I Banned This <span class="text-slate-400">(optional)</span>
+          <label class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Duration
           </label>
-          <textarea id="banWhy" rows="2" placeholder="Your reason for keeping this ban..." class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043] transition resize-none"></textarea>
+          <div class="grid grid-cols-4 gap-2 mb-2.5">
+            <button type="button" onclick="selectStartPreset(7, false)" data-start-preset="7" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">7d</button>
+            <button type="button" onclick="selectStartPreset(14, false)" data-start-preset="14" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">14d</button>
+            <button type="button" onclick="selectStartPreset(30, false)" data-start-preset="30" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition">30d</button>
+            <button type="button" onclick="selectStartPreset(0, true)" data-start-preset="forever" class="start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">Forever ∞</button>
+          </div>
+          <div id="startCustomDaysWrap">
+            <input
+              id="inputStartDays"
+              type="number"
+              min="1"
+              max="36500"
+              value="30"
+              oninput="onStartDaysManualInput()"
+              placeholder="Custom number of days"
+              class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
+          </div>
+          <input id="inputStartForever" type="hidden" value="false" />
         </div>
 
-        <!-- Duration Section -->
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="banDurationDays" class="block text-xs font-medium text-slate-500 dark:text-slate-400">
-              Duration (Days)
-            </label>
-            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 cursor-pointer">
-              <input id="banIsForever" type="checkbox" onchange="toggleForeverInput()" class="rounded accent-[#2ea043]" />
-              <span>Forever (∞)</span>
-            </label>
-          </div>
-
-          <div id="durationInputsWrap" class="space-y-2">
-            <div class="grid grid-cols-5 gap-1.5">
-              <button type="button" onclick="setFormDuration(7)" class="py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-[#2ea043] hover:text-white transition cursor-pointer">7d</button>
-              <button type="button" onclick="setFormDuration(14)" class="py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-[#2ea043] hover:text-white transition cursor-pointer">14d</button>
-              <button type="button" onclick="setFormDuration(30)" class="py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-[#2ea043] hover:text-white transition cursor-pointer">30d</button>
-              <button type="button" onclick="setFormDuration(90)" class="py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-[#2ea043] hover:text-white transition cursor-pointer">90d</button>
-              <button type="button" onclick="setFormDuration(365)" class="py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-[#2ea043] hover:text-white transition cursor-pointer">365d</button>
-            </div>
-            <input id="banDurationDays" type="number" min="1" max="36500" value="30" oninput="updateFormTargetPreview()" class="w-full px-3.5 py-2.5 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043] transition" />
-          </div>
-
-          <p id="formTargetPreview" class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Target End Date: <span class="font-medium text-slate-700 dark:text-slate-200">—</span>
-          </p>
-          <p id="editKeepStreakNote" class="hidden text-xs text-[#2ea043] mt-1 font-medium">
-            Your current streak and original start date remain intact.
-          </p>
+          <label for="inputBanReason" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Why I Banned This <span class="opacity-60">(optional)</span>
+          </label>
+          <textarea
+            id="inputBanReason"
+            rows="3"
+            maxlength="400"
+            placeholder="Write your reason so you remember why you started..."
+            class="w-full px-3.5 py-2.5 rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043] resize-none"
+          ></textarea>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeModal('modalBanForm')" class="px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-            Close
+        <div class="pt-2 safe-bottom flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="closeStartBanModal()"
+            class="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border border-[#d0d7de] dark:border-[#30363d] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d] transition"
+          >
+            Cancel
           </button>
-          <button id="btnSubmitBanForm" type="submit" class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
+          <button
+            type="submit"
+            class="flex-1 sm:flex-none px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+          >
             Start Ban
           </button>
         </div>
@@ -310,123 +356,402 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL 3: GITHUB BACKEND CONFIGURATION MODAL                           -->
+  <!-- MODAL 2: BAN DETAILS + 53-WEEK GITHUB ACTIVITY GRAPH                  -->
   <!-- ===================================================================== -->
-  <div id="modalGithub" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
-    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>
-          <h3 class="text-base font-bold">GitHub JSON Backend</h3>
-        </div>
-        <button onclick="closeModal('modalGithub')" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+  <div
+    id="modalBanDetail"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    onclick="if(event.target === this) closeBanDetailModal()"
+  >
+    <div class="modal-sheet w-full sm:max-w-3xl rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <!-- Mobile Bottom Sheet Drag Indicator -->
+      <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-4">
+      <!-- Detail Header -->
+      <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-start justify-between gap-3 shrink-0">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#2ea043]/15 text-[#2ea043]">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#2ea043]"></span>
+              Active Ban
+            </span>
+          </div>
+          <h3 id="detailBanName" class="text-lg sm:text-xl font-bold break-words leading-snug"></h3>
+        </div>
+        <button
+          type="button"
+          onclick="closeBanDetailModal()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[#656d76] dark:text-[#8b949e] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d]"
+          aria-label="Close"
+        >✕</button>
+      </div>
+
+      <input id="detailBanId" type="hidden" value="" />
+
+      <!-- Detail Scrollable Body -->
+      <div class="p-4 sm:p-5 overflow-y-auto overscroll-contain flex-1 space-y-4">
+        <!-- Key Stats Grid (2x2 on mobile, 4 cols on desktop) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">Passed Time</div>
+            <div id="detailLiveTimer" class="text-xs sm:text-sm font-mono font-semibold text-[#2ea043] tabular-nums">0d 00h 00m 00s</div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">Remaining</div>
+            <div id="detailRemainingText" class="text-xs sm:text-sm font-semibold"></div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">Start Date</div>
+            <div id="detailStartDate" class="text-xs sm:text-sm font-medium"></div>
+          </div>
+
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">End Date</div>
+            <div id="detailEndDate" class="text-xs sm:text-sm font-medium"></div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div>
+          <div class="w-full h-2 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
+            <div id="detailProgressBar" class="h-full bg-[#2ea043] rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Why I Banned This -->
+        <div id="detailReasonBox" class="p-3.5 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-[#656d76] dark:text-[#8b949e] mb-1">
+            Why I Banned This
+          </div>
+          <p id="detailReasonText" class="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words"></p>
+        </div>
+
+        <!-- 53-Week (1-Year) GitHub Activity Graph -->
+        <div class="p-3.5 sm:p-4 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#0d1117]">
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <span id="detailGraphSummary" class="text-xs font-medium text-[#656d76] dark:text-[#8b949e]">
+              0 days banned in the last year
+            </span>
+            <span class="sm:hidden text-[11px] text-[#656d76] dark:text-[#8b949e]">
+              Swipe ←
+            </span>
+          </div>
+
+          <!-- Horizontal Scrollable 53-Week Grid -->
+          <div id="detailHeatmapScroll" class="heatmap-scroll overflow-x-auto pb-1">
+            <div id="detailHeatmapContainer" class="inline-block min-w-max"></div>
+          </div>
+
+          <!-- Strictly 2-Color Legend (Single Grey + Single Green) -->
+          <div class="mt-2.5 pt-2 border-t border-[#d0d7de]/60 dark:border-[#30363d]/60 flex items-center justify-between text-[11px] text-[#656d76] dark:text-[#8b949e]">
+            <span>Tap any square for date</span>
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="gh-cell gh-cell-inactive inline-block"></span>
+                <span>Inactive</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="gh-cell gh-cell-active inline-block"></span>
+                <span>Banned</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Cancel Confirmation Box (Replaces browser confirm()) -->
+        <div id="cancelConfirmBox" class="hidden p-3.5 rounded-xl border border-rose-500/40 bg-rose-500/10 space-y-2.5">
+          <p class="text-xs sm:text-sm font-medium text-rose-600 dark:text-rose-400">
+            Cancel this ban? It will be archived in your JSON file and removed from your home screen.
+          </p>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="hideCancelConfirm()"
+              class="flex-1 sm:flex-none px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22]"
+            >
+              Keep Ban
+            </button>
+            <button
+              type="button"
+              onclick="confirmCancelActiveBan()"
+              class="flex-1 sm:flex-none px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700"
+            >
+              Yes, Cancel & Archive
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Footer (Update & Cancel Actions Only) -->
+      <div class="px-4 sm:px-5 py-3.5 safe-bottom border-t border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#161b22] flex items-center justify-between gap-2.5 shrink-0">
+        <button
+          type="button"
+          onclick="showCancelConfirm()"
+          class="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/15 active:scale-[0.98] transition"
+        >
+          Cancel Ban
+        </button>
+
+        <button
+          type="button"
+          onclick="openUpdateBanModal()"
+          class="flex-1 sm:flex-none px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+        >
+          Update Ban
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: UPDATE ACTIVE BAN (Preserves Start Date & Active Streak)     -->
+  <!-- ===================================================================== -->
+  <div
+    id="modalUpdateBan"
+    class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    onclick="if(event.target === this) closeUpdateBanModal()"
+  >
+    <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
+      </div>
+
+      <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-base sm:text-lg font-semibold">Update Ban</h3>
+          <p class="text-[11px] text-[#656d76] dark:text-[#8b949e]">Your original start date and active streak stay intact.</p>
+        </div>
+        <button
+          type="button"
+          onclick="closeUpdateBanModal()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#656d76] dark:text-[#8b949e] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d]"
+          aria-label="Close"
+        >✕</button>
+      </div>
+
+      <form id="formUpdateBan" onsubmit="handleUpdateBanSubmit(event)" class="p-5 overflow-y-auto overscroll-contain flex-1 space-y-4">
+        <input id="updateBanId" type="hidden" value="" />
+
+        <div>
+          <label for="updateBanName" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Ban Name
+          </label>
+          <input
+            id="updateBanName"
+            type="text"
+            required
+            maxlength="80"
+            class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Total Duration (from Start Date)
+          </label>
+          <div class="grid grid-cols-4 gap-2 mb-2.5">
+            <button type="button" onclick="extendUpdateDays(7)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+7d</button>
+            <button type="button" onclick="extendUpdateDays(14)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+14d</button>
+            <button type="button" onclick="extendUpdateDays(30)" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">+30d</button>
+            <button type="button" id="btnUpdateForever" onclick="toggleUpdateForever()" class="py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition">Forever ∞</button>
+          </div>
+          <div id="updateCustomDaysWrap">
+            <input
+              id="updateDurationDays"
+              type="number"
+              min="1"
+              max="36500"
+              class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
+          </div>
+          <input id="updateIsForever" type="hidden" value="false" />
+        </div>
+
+        <div>
+          <label for="updateBanReason" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Why I Banned This
+          </label>
+          <textarea
+            id="updateBanReason"
+            rows="3"
+            maxlength="400"
+            class="w-full px-3.5 py-2.5 rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043] resize-none"
+          ></textarea>
+        </div>
+
+        <div class="pt-2 safe-bottom flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="closeUpdateBanModal()"
+            class="flex-1 sm:flex-none px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border border-[#d0d7de] dark:border-[#30363d] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d] transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="flex-1 sm:flex-none px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: GITHUB JSON BACKEND CONFIGURATION                            -->
+  <!-- ===================================================================== -->
+  <div
+    id="modalGithub"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    onclick="if(event.target === this) closeGithubModal()"
+  >
+    <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
+      </div>
+
+      <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+          </svg>
+          <h3 class="text-base sm:text-lg font-semibold">GitHub JSON Backend</h3>
+        </div>
+        <button
+          type="button"
+          onclick="closeGithubModal()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#656d76] dark:text-[#8b949e] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d]"
+          aria-label="Close"
+        >✕</button>
+      </div>
+
+      <form id="formGithub" onsubmit="handleSaveAndSyncGithub(event)" class="p-5 overflow-y-auto overscroll-contain flex-1 space-y-3.5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">GitHub Username</label>
-            <input id="ghOwner" type="text" placeholder="octocat" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+            <label for="ghOwner" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1">GitHub Username</label>
+            <input
+              id="ghOwner"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="ahmedbentabet"
+              class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Repository Name</label>
-            <input id="ghRepo" type="text" placeholder="mybans-data" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+            <label for="ghRepo" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1">Repository Name</label>
+            <input
+              id="ghRepo"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="mybans-data"
+              class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">JSON File Path</label>
-            <input id="ghPath" type="text" value="mybans.json" placeholder="mybans.json" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+            <label for="ghPath" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1">JSON File Path</label>
+            <input
+              id="ghPath"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              value="mybans.json"
+              placeholder="mybans.json"
+              class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Branch</label>
-            <input id="ghBranch" type="text" value="master" placeholder="master" class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+            <label for="ghBranch" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1">Branch</label>
+            <input
+              id="ghBranch"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              value="master"
+              placeholder="master"
+              class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+            />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Personal Access Token (Contents: Read & Write)</label>
-          <input id="ghToken" type="password" placeholder="github_pat_..." class="w-full px-3.5 py-2 rounded-xl text-sm font-mono bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2ea043]" />
+          <label for="ghToken" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1">
+            Personal Access Token (Contents: Read & Write)
+          </label>
+          <input
+            id="ghToken"
+            type="password"
+            autocomplete="off"
+            placeholder="github_pat_..."
+            class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
+          />
         </div>
 
-        <div id="ghFeedbackBox" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+        <!-- Inline Status Feedback -->
+        <div id="ghFeedback" class="hidden px-3 py-2 rounded-xl text-xs leading-relaxed"></div>
 
-        <div class="flex items-center justify-between gap-2 pt-2">
-          <button type="button" onclick="disconnectGithub()" class="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition cursor-pointer">
+        <!-- Combined Save & Sync + Disconnect -->
+        <div class="pt-1 flex items-center justify-between gap-2.5">
+          <button
+            type="button"
+            onclick="disconnectGithub()"
+            class="px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs sm:text-sm font-medium text-[#656d76] dark:text-[#8b949e] hover:text-rose-500 transition"
+          >
             Disconnect
           </button>
-          <button type="button" onclick="saveGithubConfig()" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
+
+          <button
+            id="btnSaveAndSync"
+            type="submit"
+            class="flex-1 sm:flex-none px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold text-white bg-[#2ea043] hover:bg-[#2c974b] active:scale-[0.98] transition shadow-sm"
+          >
             Save & Sync
           </button>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 4: SAVED BANS (FINISHED & CANCELLED) + JSON INSPECTOR           -->
-  <!-- ===================================================================== -->
-  <div id="modalJson" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
-    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-        <div>
-          <h3 class="text-base font-bold">Saved Bans & mybans.json</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Finished and cancelled bans are archived here automatically.</p>
-        </div>
-        <button onclick="closeModal('modalJson')" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-
-      <div class="p-6 flex-1 overflow-y-auto space-y-5">
-        <!-- Archived Finished / Cancelled Bans List -->
-        <div class="space-y-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">Finished & Cancelled Bans</span>
-          <div id="savedBansList" class="space-y-2"></div>
-        </div>
-
-        <!-- JSON Controls -->
-        <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
-          <div class="flex flex-wrap items-center gap-2">
-            <button onclick="downloadJsonFile()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#2ea043] hover:bg-[#2c974b] text-white transition cursor-pointer">
-              ⬇ Download mybans.json
+        <!-- Local JSON Backup / Restore Row -->
+        <div class="pt-3 safe-bottom border-t border-[#d0d7de] dark:border-[#30363d] flex items-center justify-between gap-2">
+          <span class="text-[11px] text-[#656d76] dark:text-[#8b949e]">Local JSON Backup</span>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="exportJsonFile()"
+              class="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition"
+            >
+              Export .json
             </button>
-            <label class="px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              ⬆ Import .json
-              <input type="file" accept=".json,application/json" onchange="importJsonFile(event)" class="hidden" />
+            <label class="px-3 py-1.5 min-h-[36px] inline-flex items-center rounded-lg text-xs font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] cursor-pointer transition">
+              <span>Import</span>
+              <input type="file" accept=".json,application/json" class="hidden" onchange="importJsonFile(event)" />
             </label>
-            <button onclick="copyJsonToClipboard()" class="px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              📋 Copy JSON
-            </button>
           </div>
-
-          <pre id="jsonPreviewCode" class="p-4 rounded-xl bg-slate-950 text-[#2ea043] font-mono text-xs overflow-x-auto max-h-64 border border-slate-800 leading-relaxed"></pre>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- Floating GitHub Heatmap Day Tooltip -->
-  <div id="heatmapTooltip" class="fixed z-[60] hidden pointer-events-none px-3 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs shadow-xl border border-slate-700/80 max-w-[240px]">
-    <div id="heatmapTooltipDate" class="font-mono font-bold text-[11px] text-slate-300"></div>
-    <div id="heatmapTooltipDetail" class="font-semibold mt-0.5"></div>
-  </div>
-
   <!-- ===================================================================== -->
-  <!-- APPLICATION LOGIC (JAVASCRIPT)                                        -->
+  <!-- APPLICATION LOGIC                                                     -->
   <!-- ===================================================================== -->
   <script>
     // -------------------------------------------------------------------------
-    // 1. STATE & CONSTANTS
+    // 1. CONSTANTS & STATE
     // -------------------------------------------------------------------------
     const STORAGE_KEY_DATA = 'mybans_data_v2';
-    const STORAGE_KEY_GH = 'mybans_github_config_v1';
+    const STORAGE_KEY_GH = 'mybans_github_cfg_v2';
     const STORAGE_KEY_THEME = 'mybans_theme_v1';
 
     let appState = {
@@ -434,8 +759,8 @@
       version: 2,
       lastUpdated: null,
       lastSyncedAt: null,
-      bans: [],       // Active bans shown on Home Page
-      savedBans: []   // Finished or Cancelled bans removed from Home Page
+      bans: [],
+      savedBans: []
     };
 
     let githubConfig = {
@@ -444,20 +769,20 @@
       path: 'mybans.json',
       branch: 'master',
       token: '',
-      lastSha: null
+      sha: null
     };
 
-    let liveTickerInterval = null;
-    let backgroundSyncInterval = null;
     let hasUnsyncedLocalChanges = false;
+    let isSyncInProgress = false;
+    let liveTickerInterval = null;
+    let toastTimeout = null;
 
     // -------------------------------------------------------------------------
-    // 2. INITIALIZATION
+    // 2. INITIALIZATION & THEME
     // -------------------------------------------------------------------------
     window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       loadLocalState();
-      await checkFinishedBans(false);
       loadGithubConfig();
       renderAll();
       startLiveTicker();
@@ -465,352 +790,273 @@
 
       if (isGithubConfigured()) {
         await smartSyncGithub(false, false);
-        await checkFinishedBans(true);
       }
+      await checkFinishedBans(true);
     });
 
     function initTheme() {
-      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'dark';
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
+      try {
+        const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+        applyTheme(isDark);
+      } catch (e) {
+        applyTheme(true);
+      }
+    }
+
+    function applyTheme(isDark) {
+      const root = document.documentElement;
+      const metaTheme = document.getElementById('metaThemeColor');
+      if (isDark) {
+        root.classList.add('dark');
+        if (metaTheme) metaTheme.setAttribute('content', '#0d1117');
       } else {
-        document.documentElement.classList.remove('dark');
+        root.classList.remove('dark');
+        if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+      } catch (e) {
+        // Ignore storage errors
       }
     }
 
     function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
-    }
-
-    function loadLocalState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_DATA) || localStorage.getItem('mybans_data_v1');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.bans)) {
-            appState = {
-              app: 'MyBans',
-              version: 2,
-              lastUpdated: parsed.lastUpdated || null,
-              lastSyncedAt: parsed.lastSyncedAt || null,
-              bans: parsed.bans,
-              savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
-            };
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse local MyBans state:', e);
-      }
-
-      // Start empty on a fresh device so connecting GitHub pulls remote bans cleanly
-      appState = {
-        app: 'MyBans',
-        version: 2,
-        lastUpdated: null,
-        lastSyncedAt: null,
-        bans: [],
-        savedBans: []
-      };
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isCurrentlyDark);
     }
 
     // -------------------------------------------------------------------------
-    // 3. PASSIVE STREAK, AUTO-FINISH & TIME CALCULATIONS
+    // 3. DATE & STREAK CALCULATIONS
     // -------------------------------------------------------------------------
     function computeBanMetrics(ban, nowMs = Date.now()) {
       const startMs = new Date(ban.startDate).getTime();
       const elapsedMs = Math.max(0, nowMs - startMs);
-      const totalSeconds = Math.floor(elapsedMs / 1000);
 
+      const totalSeconds = Math.floor(elapsedMs / 1000);
       const days = Math.floor(totalSeconds / 86400);
       const hours = Math.floor((totalSeconds % 86400) / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
 
-      const bestStreakDays = Math.max(ban.bestStreakDays || 0, days);
+      const bestStreakDays = Math.max(Number(ban.bestStreakDays || 0), days);
 
-      let progressPct = 0;
-      let remainingMs = 0;
-      let isCompleted = false;
-
-      if (ban.isForever) {
-        progressPct = 100;
-      } else {
-        const endMs = new Date(ban.lastDate).getTime();
-        const totalDurationMs = Math.max(1000, endMs - startMs);
-        progressPct = Math.min(100, Math.max(0, (elapsedMs / totalDurationMs) * 100));
-        remainingMs = Math.max(0, endMs - nowMs);
-        isCompleted = nowMs >= endMs;
+      if (ban.isForever || !ban.targetEndDate) {
+        return {
+          days,
+          hours,
+          minutes,
+          seconds,
+          bestStreakDays,
+          remainingMs: Infinity,
+          progressPct: 100,
+          isCompleted: false
+        };
       }
 
+      const endMs = new Date(ban.targetEndDate).getTime();
+      const totalDurationMs = Math.max(1000, endMs - startMs);
+      const remainingMs = Math.max(0, endMs - nowMs);
+      const progressPct = Math.min(100, Math.max(0, (elapsedMs / totalDurationMs) * 100));
+      const isCompleted = nowMs >= endMs;
+
       return {
-        elapsedMs,
         days,
         hours,
         minutes,
         seconds,
         bestStreakDays,
-        progressPct,
         remainingMs,
+        progressPct,
         isCompleted
       };
     }
 
-    async function checkFinishedBans(shouldSync = true) {
-      const nowMs = Date.now();
-      const stillActive = [];
-      const newlyFinished = [];
-
-      appState.bans.forEach(ban => {
-        if (!ban.isForever && ban.lastDate && nowMs >= new Date(ban.lastDate).getTime()) {
-          const finalDays = ban.durationDays || Math.max(1, Math.floor((new Date(ban.lastDate).getTime() - new Date(ban.startDate).getTime()) / 86400000));
-          newlyFinished.push({
-            ...ban,
-            status: 'finished',
-            endedAt: ban.lastDate,
-            streakDays: finalDays,
-            bestStreakDays: Math.max(ban.bestStreakDays || 0, finalDays)
-          });
-        } else {
-          stillActive.push(ban);
-        }
-      });
-
-      if (newlyFinished.length > 0) {
-        appState.bans = stillActive;
-        appState.savedBans = [...newlyFinished, ...(appState.savedBans || [])];
-        const openDetailId = document.getElementById('detailBanId')?.value;
-        if (newlyFinished.some(b => b.id === openDetailId)) {
-          closeModal('modalBanDetail');
-        }
-        renderAll();
-        if (shouldSync) {
-          await persistAndSync(`Finished ban: ${newlyFinished.map(b => b.name).join(', ')}`);
-        } else {
-          saveLocalState();
-        }
-        newlyFinished.forEach(b => {
-          showToast(`Finished "${b.name}" (${b.streakDays}d) — saved & removed from home.`, 'success');
-        });
-      }
-    }
-
     function formatDurationCompact(ms) {
-      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      if (!isFinite(ms)) return 'Forever ∞';
+      if (ms <= 0) return '0m';
+      const totalSec = Math.floor(ms / 1000);
       const d = Math.floor(totalSec / 86400);
       const h = Math.floor((totalSec % 86400) / 3600);
       const m = Math.floor((totalSec % 3600) / 60);
       if (d > 0) return `${d}d ${h}h`;
       if (h > 0) return `${h}h ${m}m`;
-      return `${m}m`;
+      return `${Math.max(1, m)}m`;
     }
 
-    function formatDateReadable(isoStr) {
-      if (!isoStr) return 'Forever ∞';
-      const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return '—';
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    function formatShortDate(isoStr) {
+      if (!isoStr) return '—';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch (e) {
+        return isoStr;
+      }
     }
 
-    // -------------------------------------------------------------------------
-    // 3B. GITHUB-STYLE HEATMAP (STRICTLY SINGLE GREEN & SINGLE GREY)
-    // -------------------------------------------------------------------------
-    function toLocalDateKey(dateObj) {
+    function toLocalDayKey(dateObj) {
       const y = dateObj.getFullYear();
       const m = String(dateObj.getMonth() + 1).padStart(2, '0');
       const d = String(dateObj.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     }
 
-    function parseLocalMidnight(isoStr) {
-      const d = new Date(isoStr);
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    }
+    // -------------------------------------------------------------------------
+    // 4. 53-WEEK GITHUB ACTIVITY HEATMAP (SINGLE GREEN & SINGLE GREY)
+    // -------------------------------------------------------------------------
+    function renderBanGithubGraph(ban) {
+      const container = document.getElementById('detailHeatmapContainer');
+      const summaryEl = document.getElementById('detailGraphSummary');
+      if (!container) return;
 
-    function buildBanDayMap(ban) {
-      const dayMap = new Map();
       const now = new Date();
-      const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayTime = todayStart.getTime();
 
-      const relatedRuns = (appState.savedBans || []).filter(
-        sb => sb.name && ban.name && sb.name.trim().toLowerCase() === ban.name.trim().toLowerCase()
-      );
-      relatedRuns.forEach(run => {
-        if (!run.startDate) return;
-        const sMid = parseLocalMidnight(run.startDate);
-        const eMid = parseLocalMidnight(run.endedAt || run.lastDate || now.toISOString());
-        let cursor = new Date(sMid);
-        let dayNum = 1;
-        while (cursor <= eMid && cursor <= todayMid) {
-          dayMap.set(toLocalDateKey(cursor), {
-            active: true,
-            streakDay: dayNum
+      const banStart = new Date(ban.startDate);
+      const banStartDay = new Date(banStart.getFullYear(), banStart.getMonth(), banStart.getDate()).getTime();
+
+      const banEndDay = (!ban.isForever && ban.targetEndDate)
+        ? new Date(
+            new Date(ban.targetEndDate).getFullYear(),
+            new Date(ban.targetEndDate).getMonth(),
+            new Date(ban.targetEndDate).getDate()
+          ).getTime()
+        : todayTime;
+
+      // Start 52 full weeks prior to the Sunday of the current week (53 columns total)
+      const currentSunday = new Date(todayStart);
+      currentSunday.setDate(todayStart.getDate() - todayStart.getDay());
+
+      const gridStart = new Date(currentSunday);
+      gridStart.setDate(currentSunday.getDate() - 52 * 7);
+
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const weeks = [];
+      let activeDaysInYear = 0;
+
+      for (let w = 0; w < 53; w++) {
+        const daysCol = [];
+        for (let d = 0; d < 7; d++) {
+          const cellDate = new Date(gridStart);
+          cellDate.setDate(gridStart.getDate() + w * 7 + d);
+          const cellTime = cellDate.getTime();
+          const isFuture = cellTime > todayTime;
+          const isActive = !isFuture && cellTime >= banStartDay && cellTime <= Math.min(todayTime, banEndDay);
+
+          if (isActive) activeDaysInYear++;
+
+          const dayNum = isActive ? Math.floor((cellTime - banStartDay) / 86400000) + 1 : 0;
+          daysCol.push({
+            date: cellDate,
+            dateLabel: cellDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
+            isFuture,
+            isActive,
+            dayNum
           });
-          dayNum++;
-          cursor.setDate(cursor.getDate() + 1);
         }
-      });
-
-      if (ban.startDate) {
-        const startMid = parseLocalMidnight(ban.startDate);
-        const endLimit = ban.endedAt ? parseLocalMidnight(ban.endedAt) : todayMid;
-        let cursor = new Date(startMid);
-        let streakDay = 1;
-
-        while (cursor <= endLimit && cursor <= todayMid) {
-          dayMap.set(toLocalDateKey(cursor), {
-            active: true,
-            streakDay
-          });
-          streakDay++;
-          cursor.setDate(cursor.getDate() + 1);
-        }
+        weeks.push(daysCol);
       }
 
-      return dayMap;
-    }
-
-    function getHeatmapCellStyle(info) {
-      if (info && info.active) {
-        return 'bg-[#2ea043]';
+      if (summaryEl) {
+        summaryEl.textContent = `${activeDaysInYear} ${activeDaysInYear === 1 ? 'day' : 'days'} banned in the last year`;
       }
-      return 'bg-[#ebedf0] dark:bg-[#161b22]';
-    }
 
-    function renderGitHubHeatmap(ban, weeksCount = 53) {
-      const dayMap = buildBanDayMap(ban);
-      const now = new Date();
-      const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      const todayDow = todayMid.getDay();
-      const endOfGrid = new Date(todayMid);
-      endOfGrid.setDate(todayMid.getDate() + (6 - todayDow));
-
-      const totalDays = weeksCount * 7;
-      const startOfGrid = new Date(endOfGrid);
-      startOfGrid.setDate(endOfGrid.getDate() - (totalDays - 1));
-
-      let activeDaysCount = 0;
-      let cellsHtml = '';
-      const monthMarkers = [];
+      // Build Month Header Row
       let lastMonth = -1;
-
-      for (let i = 0; i < totalDays; i++) {
-        const cellDate = new Date(startOfGrid);
-        cellDate.setDate(startOfGrid.getDate() + i);
-        const weekIdx = Math.floor(i / 7);
-        const dow = cellDate.getDay();
-
-        if (dow === 0) {
-          const m = cellDate.getMonth();
-          if (m !== lastMonth) {
-            if (!(weekIdx === 0 && cellDate.getDate() > 24)) {
-              monthMarkers.push({
-                weekIdx,
-                label: cellDate.toLocaleDateString(undefined, { month: 'short' })
-              });
-            }
-            lastMonth = m;
-          }
+      let monthHeaderHtml = '<div class="flex items-center mb-1.5 pl-8 text-[10px] text-[#656d76] dark:text-[#8b949e] select-none">';
+      weeks.forEach((col, idx) => {
+        const firstDay = col[0].date;
+        const m = firstDay.getMonth();
+        let label = '';
+        if (m !== lastMonth && idx < 51) {
+          label = monthNames[m];
+          lastMonth = m;
         }
+        monthHeaderHtml += `<div class="w-[14px] shrink-0 overflow-visible whitespace-nowrap">${label}</div>`;
+      });
+      monthHeaderHtml += '</div>';
 
-        if (cellDate > todayMid) {
-          cellsHtml += `<div class="w-[11px] h-[11px] rounded-[2px] pointer-events-none"></div>`;
-          continue;
-        }
+      // Build Day Rows (Sun..Sat with Mon, Wed, Fri labels)
+      const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+      let bodyHtml = '<div class="flex items-start">';
 
-        const key = toLocalDateKey(cellDate);
-        const info = dayMap.get(key);
-        if (info && info.active) activeDaysCount++;
-
-        const colorClass = getHeatmapCellStyle(info);
-        const dateLabel = cellDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        const statusLabel = info && info.active ? `Banned Day (Day #${info.streakDay})` : 'Inactive';
-
-        cellsHtml += `<button type="button"
-          data-date="${escapeHtml(dateLabel)}"
-          data-detail="${escapeHtml(statusLabel)}"
-          onmouseenter="showHeatmapTooltip(event, this)"
-          onmousemove="moveHeatmapTooltip(event)"
-          onmouseleave="hideHeatmapTooltip()"
-          onclick="showHeatmapTooltip(event, this)"
-          aria-label="${escapeHtml(dateLabel)}: ${escapeHtml(statusLabel)}"
-          class="gh-cell w-[11px] h-[11px] rounded-[2px] ${colorClass} cursor-pointer focus:outline-none"></button>`;
+      // Left Weekday Labels Column
+      bodyHtml += '<div class="w-8 shrink-0 flex flex-col gap-[3px] pr-1.5 text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] select-none">';
+      for (let d = 0; d < 7; d++) {
+        bodyHtml += `<div class="h-[11px] flex items-center">${dayLabels[d]}</div>`;
       }
+      bodyHtml += '</div>';
 
-      const monthHeaderCells = Array.from({ length: weeksCount }, (_, wIdx) => {
-        const found = monthMarkers.find(m => m.weekIdx === wIdx);
-        return `<div class="w-[11px] text-[11px] leading-none text-slate-500 dark:text-slate-400 overflow-visible whitespace-nowrap">${found ? found.label : ''}</div>`;
-      }).join('');
+      // 53 Week Columns
+      bodyHtml += '<div class="flex gap-[3px]">';
+      weeks.forEach(col => {
+        bodyHtml += '<div class="flex flex-col gap-[3px]">';
+        col.forEach(cell => {
+          if (cell.isFuture) {
+            bodyHtml += `<div class="gh-cell gh-cell-future"></div>`;
+          } else {
+            const stateClass = cell.isActive ? 'gh-cell-active' : 'gh-cell-inactive';
+            const detailText = cell.isActive ? `Banned • Day ${cell.dayNum}` : 'Inactive';
+            bodyHtml += `<div
+              class="gh-cell ${stateClass} cursor-pointer"
+              data-date="${escapeHtml(cell.dateLabel)}"
+              data-detail="${escapeHtml(detailText)}"
+              onmouseenter="showHeatmapTooltip(event, this)"
+              onmousemove="moveHeatmapTooltip(event)"
+              onmouseleave="hideHeatmapTooltip()"
+              onclick="showHeatmapTooltip(event, this)"
+            ></div>`;
+          }
+        });
+        bodyHtml += '</div>';
+      });
+      bodyHtml += '</div></div>';
 
-      return `
-        <div class="rounded-xl bg-white dark:bg-[#0d1117] border border-slate-200 dark:border-[#30363d] p-3.5">
-          <div class="overflow-x-auto pb-1">
-            <div class="inline-block min-w-max">
-              <div class="flex items-center gap-[3px] pl-[34px] mb-1.5 select-none">
-                ${monthHeaderCells}
-              </div>
+      container.innerHTML = monthHeaderHtml + bodyHtml;
 
-              <div class="flex items-start gap-2">
-                <div class="grid grid-rows-7 gap-[3px] text-[11px] leading-[11px] text-slate-500 dark:text-slate-400 select-none pr-0.5">
-                  <span class="h-[11px]"></span>
-                  <span class="h-[11px]">Mon</span>
-                  <span class="h-[11px]"></span>
-                  <span class="h-[11px]">Wed</span>
-                  <span class="h-[11px]"></span>
-                  <span class="h-[11px]">Fri</span>
-                  <span class="h-[11px]"></span>
-                </div>
-
-                <div class="grid grid-flow-col grid-rows-7 gap-[3px]">
-                  ${cellsHtml}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-2.5 pt-1 flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>${activeDaysCount} ${activeDaysCount === 1 ? 'day' : 'days'} in the last year</span>
-            <div class="flex items-center gap-2 select-none">
-              <span class="inline-flex items-center gap-1">
-                <span class="w-[11px] h-[11px] rounded-[2px] bg-[#ebedf0] dark:bg-[#161b22]"></span>
-                <span>Inactive</span>
-              </span>
-              <span class="inline-flex items-center gap-1">
-                <span class="w-[11px] h-[11px] rounded-[2px] bg-[#2ea043]"></span>
-                <span>Banned</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      `;
+      // Auto-scroll horizontally to the most recent weeks (right edge) for mobile convenience
+      const scrollWrapper = document.getElementById('detailHeatmapScroll');
+      if (scrollWrapper) {
+        requestAnimationFrame(() => {
+          scrollWrapper.scrollLeft = scrollWrapper.scrollWidth;
+        });
+      }
     }
 
     function showHeatmapTooltip(event, el) {
       const tooltip = document.getElementById('heatmapTooltip');
-      if (!tooltip) return;
-      document.getElementById('heatmapTooltipDate').textContent = el.getAttribute('data-date') || '';
-      document.getElementById('heatmapTooltipDetail').textContent = el.getAttribute('data-detail') || '';
+      if (!tooltip || !el) return;
+      document.getElementById('heatmapTooltipDate').textContent = el.dataset.date || '';
+      document.getElementById('heatmapTooltipDetail').textContent = el.dataset.detail || '';
       tooltip.classList.remove('hidden');
       positionHeatmapTooltip(event, el);
     }
 
     function moveHeatmapTooltip(event) {
-      positionHeatmapTooltip(event, null);
+      positionHeatmapTooltip(event, event.currentTarget);
     }
 
     function positionHeatmapTooltip(event, el) {
       const tooltip = document.getElementById('heatmapTooltip');
       if (!tooltip || tooltip.classList.contains('hidden')) return;
-      const rect = el ? el.getBoundingClientRect() : null;
-      const x = event.clientX || (rect ? rect.left + rect.width / 2 : 0);
-      const y = event.clientY || (rect ? rect.top : 0);
 
-      const tipWidth = tooltip.offsetWidth || 180;
-      const tipHeight = tooltip.offsetHeight || 48;
-      const left = Math.min(window.innerWidth - tipWidth - 12, Math.max(12, x - tipWidth / 2));
-      const top = Math.max(12, y - tipHeight - 12);
+      const rect = tooltip.getBoundingClientRect();
+      let x = event.clientX;
+      let y = event.clientY;
+
+      if ((!x && !y) && el) {
+        const cellRect = el.getBoundingClientRect();
+        x = cellRect.left + cellRect.width / 2;
+        y = cellRect.top;
+      }
+
+      const left = Math.min(
+        Math.max(8, x - rect.width / 2),
+        window.innerWidth - rect.width - 8
+      );
+      const top = Math.max(8, y - rect.height - 10);
 
       tooltip.style.left = `${left}px`;
       tooltip.style.top = `${top}px`;
@@ -821,50 +1067,67 @@
       if (tooltip) tooltip.classList.add('hidden');
     }
 
+    document.addEventListener('touchstart', (e) => {
+      if (!e.target.closest('.gh-cell')) {
+        hideHeatmapTooltip();
+      }
+    }, { passive: true });
+
+    // -------------------------------------------------------------------------
+    // 5. STORAGE, AUTO-SYNC & LIVE TICKER
+    // -------------------------------------------------------------------------
     function buildNormalizedExportObject() {
       const nowMs = Date.now();
-      const normalizedBans = appState.bans.map(ban => {
+      const normalizedBans = (appState.bans || []).map(ban => {
         const m = computeBanMetrics(ban, nowMs);
         return {
-          id: ban.id,
-          name: ban.name,
-          why: ban.why || '',
-          startDate: ban.startDate,
-          lastDate: ban.isForever ? null : ban.lastDate,
-          durationDays: ban.isForever ? null : ban.durationDays,
-          isForever: Boolean(ban.isForever),
+          ...ban,
           currentStreakDays: m.days,
-          bestStreakDays: m.bestStreakDays,
-          status: 'active',
-          updatedAt: ban.updatedAt || new Date(nowMs).toISOString()
+          bestStreakDays: m.bestStreakDays
         };
       });
 
       return {
         app: 'MyBans',
         version: 2,
-        lastUpdated: appState.lastUpdated || new Date(nowMs).toISOString(),
+        lastUpdated: appState.lastUpdated || new Date().toISOString(),
+        lastSyncedAt: appState.lastSyncedAt || null,
         bans: normalizedBans,
         savedBans: appState.savedBans || []
       };
     }
 
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_DATA);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          appState = {
+            app: 'MyBans',
+            version: 2,
+            lastUpdated: parsed.lastUpdated || null,
+            lastSyncedAt: parsed.lastSyncedAt || null,
+            bans: Array.isArray(parsed.bans) ? parsed.bans : [],
+            savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
+          };
+        }
+      } catch (e) {
+        console.error('Failed to load local MyBans state:', e);
+      }
+    }
+
     function saveLocalState() {
       try {
-        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(appState));
+        const payload = buildNormalizedExportObject();
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(payload));
       } catch (e) {
-        console.error('Failed to save to localStorage:', e);
+        console.error('Failed to save local MyBans state:', e);
       }
     }
 
     async function persistAndSync(commitMessage = 'Update MyBans') {
-      const nowMs = Date.now();
-      appState.lastUpdated = new Date(nowMs).toISOString();
-      appState.bans.forEach(ban => {
-        const m = computeBanMetrics(ban, nowMs);
-        ban.currentStreakDays = m.days;
-        ban.bestStreakDays = m.bestStreakDays;
-      });
+      appState.lastUpdated = new Date().toISOString();
       hasUnsyncedLocalChanges = true;
       saveLocalState();
 
@@ -873,316 +1136,439 @@
       }
     }
 
-    // -------------------------------------------------------------------------
-    // 4. LIVE TICKER (UPDATES TIMERS EVERY 1s & AUTO-FINISHES COMPLETED BANS)
-    // -------------------------------------------------------------------------
     function startLiveTicker() {
       if (liveTickerInterval) clearInterval(liveTickerInterval);
       liveTickerInterval = setInterval(async () => {
-        await checkFinishedBans(true);
-
         const nowMs = Date.now();
-        const openDetailId = document.getElementById('detailBanId')?.value;
+        let hasNewlyCompleted = false;
 
         appState.bans.forEach(ban => {
           const m = computeBanMetrics(ban, nowMs);
-          const formattedTime = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-
-          const cardTimerEl = document.getElementById(`card-timer-${ban.id}`);
-          if (cardTimerEl) {
-            cardTimerEl.textContent = formattedTime;
-          }
-          const cardBarEl = document.getElementById(`card-bar-${ban.id}`);
-          if (cardBarEl) {
-            cardBarEl.style.width = `${m.progressPct.toFixed(2)}%`;
-          }
-          const cardRemEl = document.getElementById(`card-rem-${ban.id}`);
-          if (cardRemEl) {
-            cardRemEl.textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+          if (m.isCompleted) {
+            hasNewlyCompleted = true;
+            return;
           }
 
-          if (openDetailId === ban.id) {
-            const dTimer = document.getElementById('detailLiveTimer');
-            if (dTimer) dTimer.textContent = formattedTime;
-            const dBar = document.getElementById('detailProgressBar');
-            if (dBar) dBar.style.width = `${m.progressPct.toFixed(2)}%`;
-            const dRem = document.getElementById('detailRemainingText');
-            if (dRem) dRem.textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+          const timerEl = document.getElementById(`card-timer-${ban.id}`);
+          const remEl = document.getElementById(`card-rem-${ban.id}`);
+          const barEl = document.getElementById(`card-bar-${ban.id}`);
+
+          if (timerEl) {
+            timerEl.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+          }
+          if (remEl) {
+            remEl.textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+          }
+          if (barEl) {
+            barEl.style.width = `${m.progressPct.toFixed(2)}%`;
           }
         });
+
+        const detailModal = document.getElementById('modalBanDetail');
+        if (detailModal && !detailModal.classList.contains('hidden')) {
+          const detailId = document.getElementById('detailBanId')?.value;
+          const activeBan = appState.bans.find(b => b.id === detailId);
+          if (activeBan) {
+            const m = computeBanMetrics(activeBan, nowMs);
+            const dTimer = document.getElementById('detailLiveTimer');
+            const dRem = document.getElementById('detailRemainingText');
+            const dBar = document.getElementById('detailProgressBar');
+            if (dTimer) dTimer.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+            if (dRem) dRem.textContent = activeBan.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+            if (dBar) dBar.style.width = `${m.progressPct.toFixed(2)}%`;
+          }
+        }
+
+        if (hasNewlyCompleted) {
+          await checkFinishedBans(true);
+        }
       }, 1000);
     }
 
     function startAutoSyncListeners() {
-      document.addEventListener('visibilitychange', () => {
+      document.addEventListener('visibilitychange', async () => {
         if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          smartSyncGithub(false, false);
+          await smartSyncGithub(false, false);
+          await checkFinishedBans(true);
         }
       });
 
-      if (backgroundSyncInterval) clearInterval(backgroundSyncInterval);
-      backgroundSyncInterval = setInterval(() => {
-        if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          smartSyncGithub(false, false);
+      window.addEventListener('online', async () => {
+        if (isGithubConfigured() && hasUnsyncedLocalChanges) {
+          await smartSyncGithub(false, false);
         }
-      }, 30000);
+      });
     }
 
     // -------------------------------------------------------------------------
-    // 5. RENDERING MINIMALIST HOME PAGE (ONLY ACTIVE BANS)
+    // 6. HOME PAGE RENDERING
     // -------------------------------------------------------------------------
     function renderAll() {
-      renderBans();
+      renderBansGrid();
       updateSyncStatusUI();
     }
 
-    function renderBans() {
+    function renderBansGrid() {
       const grid = document.getElementById('bansGrid');
-      const empty = document.getElementById('emptyState');
-      const nowMs = Date.now();
+      const emptyState = document.getElementById('emptyState');
+      if (!grid || !emptyState) return;
 
-      if (appState.bans.length === 0) {
+      if (!appState.bans || appState.bans.length === 0) {
         grid.innerHTML = '';
-        empty.classList.remove('hidden');
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
         return;
       }
 
-      empty.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      grid.classList.remove('hidden');
+      const nowMs = Date.now();
 
       grid.innerHTML = appState.bans.map(ban => {
         const m = computeBanMetrics(ban, nowMs);
-        const remainingLabel = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+        const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+        const remStr = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
 
         return `
-          <article onclick="openBanDetailModal('${ban.id}')"
-            class="group rounded-2xl bg-white dark:bg-[#161b22] border border-slate-200/90 dark:border-slate-800 hover:border-[#2ea043] dark:hover:border-[#2ea043] p-5 transition cursor-pointer select-none">
-            <div class="flex items-center justify-between gap-4 mb-3">
-              <div class="min-w-0">
-                <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-[#2ea043] transition">
-                  ${escapeHtml(ban.name)}
-                </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
-                  Started ${formatDateReadable(ban.startDate)}
-                </p>
-              </div>
-
-              <div class="text-right shrink-0">
-                <div id="card-timer-${ban.id}" class="text-base sm:text-lg font-bold font-mono tabular-nums text-[#2ea043]">
-                  ${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s
-                </div>
-                <div id="card-rem-${ban.id}" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  ${remainingLabel}
-                </div>
-              </div>
+          <button
+            type="button"
+            onclick="openBanDetailModal('${escapeHtml(ban.id)}')"
+            class="w-full text-left p-4 sm:p-5 rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] active:scale-[0.99] transition shadow-xs group"
+          >
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <h2 class="text-base sm:text-lg font-semibold leading-snug break-words group-hover:text-[#2ea043] transition-colors">
+                ${escapeHtml(ban.name)}
+              </h2>
+              <svg class="w-4 h-4 mt-1 shrink-0 text-[#656d76] dark:text-[#8b949e] group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </div>
 
-            <!-- Minimalist Progress Bar (Strictly Green & Grey) -->
-            <div class="w-full h-1.5 rounded-full bg-[#ebedf0] dark:bg-slate-800 overflow-hidden">
-              <div id="card-bar-${ban.id}" class="h-full rounded-full bg-[#2ea043] transition-all duration-500" style="width: ${m.progressPct.toFixed(2)}%"></div>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-2.5">
+              <span id="card-timer-${escapeHtml(ban.id)}" class="text-sm sm:text-base font-mono font-semibold text-[#2ea043] tabular-nums">
+                ${timerStr}
+              </span>
+              <span id="card-rem-${escapeHtml(ban.id)}" class="text-xs font-medium text-[#656d76] dark:text-[#8b949e]">
+                ${remStr}
+              </span>
             </div>
-          </article>
+
+            <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
+              <div
+                id="card-bar-${escapeHtml(ban.id)}"
+                class="h-full bg-[#2ea043] rounded-full transition-all duration-500"
+                style="width: ${m.progressPct.toFixed(2)}%"
+              ></div>
+            </div>
+          </button>
         `;
       }).join('');
     }
 
     // -------------------------------------------------------------------------
-    // 6. BAN DETAIL MODAL & ALLOWED ACTIONS (START, UPDATE, CANCEL)
+    // 7. BAN ACTIONS: START, UPDATE, CANCEL, AUTO-FINISH
     // -------------------------------------------------------------------------
-    function openBanDetailModal(id) {
-      const ban = appState.bans.find(b => b.id === id);
-      if (!ban) return;
-      const m = computeBanMetrics(ban);
-
-      document.getElementById('detailBanId').value = ban.id;
-      document.getElementById('detailBanName').textContent = ban.name;
-      document.getElementById('detailStatusBadge').textContent = ban.isForever ? 'Forever Ban' : `${ban.durationDays}-Day Ban`;
-      document.getElementById('detailLiveTimer').textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-      document.getElementById('detailRemainingText').textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-      document.getElementById('detailProgressBar').style.width = `${m.progressPct.toFixed(2)}%`;
-      document.getElementById('detailStartDate').textContent = formatDateReadable(ban.startDate);
-      document.getElementById('detailEndDate').textContent = formatDateReadable(ban.lastDate);
-      document.getElementById('detailBestStreak').textContent = `${m.bestStreakDays}d`;
-
-      const whyWrap = document.getElementById('detailWhyWrap');
-      if (ban.why && ban.why.trim()) {
-        whyWrap.classList.remove('hidden');
-        document.getElementById('detailWhyText').textContent = ban.why;
-      } else {
-        whyWrap.classList.add('hidden');
-      }
-
-      document.getElementById('detailHeatmapContainer').innerHTML = renderGitHubHeatmap(ban, 53);
-      toggleCancelConfirm(false);
-      openModal('modalBanDetail');
+    function openStartBanModal() {
+      document.getElementById('formStartBan').reset();
+      selectStartPreset(30, false);
+      document.getElementById('modalStartBan').classList.remove('hidden');
+      setTimeout(() => document.getElementById('inputBanName')?.focus(), 80);
     }
 
-    function toggleCancelConfirm(show) {
-      const box = document.getElementById('cancelConfirmBox');
-      if (show) box.classList.remove('hidden');
-      else box.classList.add('hidden');
+    function closeStartBanModal() {
+      document.getElementById('modalStartBan').classList.add('hidden');
     }
 
-    async function confirmCancelBan() {
-      const id = document.getElementById('detailBanId').value;
-      const ban = appState.bans.find(b => b.id === id);
-      if (!ban) return;
+    function selectStartPreset(days, isForever) {
+      document.getElementById('inputStartForever').value = isForever ? 'true' : 'false';
+      const customWrap = document.getElementById('startCustomDaysWrap');
+      const daysInput = document.getElementById('inputStartDays');
 
-      const nowIso = new Date().toISOString();
-      const m = computeBanMetrics(ban);
-
-      const cancelledRecord = {
-        ...ban,
-        status: 'cancelled',
-        endedAt: nowIso,
-        streakDays: m.days,
-        bestStreakDays: m.bestStreakDays
-      };
-
-      appState.bans = appState.bans.filter(b => b.id !== id);
-      appState.savedBans = [cancelledRecord, ...(appState.savedBans || [])];
-
-      closeModal('modalBanDetail');
-      renderAll();
-      await persistAndSync(`Cancel ban: ${ban.name}`);
-      showToast(`Cancelled "${ban.name}" — saved to JSON & removed from home.`, 'info');
-    }
-
-    function openUpdateFromDetail() {
-      const id = document.getElementById('detailBanId').value;
-      closeModal('modalBanDetail');
-      openEditBanModal(id);
-    }
-
-    function openAddBanModal() {
-      document.getElementById('modalBanFormTitle').textContent = 'Start a Ban';
-      document.getElementById('btnSubmitBanForm').textContent = 'Start Ban';
-      document.getElementById('editBanId').value = '';
-      document.getElementById('banName').value = '';
-      document.getElementById('banWhy').value = '';
-      document.getElementById('banIsForever').checked = false;
-      document.getElementById('banDurationDays').value = 30;
-      document.getElementById('editKeepStreakNote').classList.add('hidden');
-      toggleForeverInput();
-      updateFormTargetPreview();
-      openModal('modalBanForm');
-      setTimeout(() => document.getElementById('banName').focus(), 60);
-    }
-
-    function openEditBanModal(id) {
-      const ban = appState.bans.find(b => b.id === id);
-      if (!ban) return;
-      document.getElementById('modalBanFormTitle').textContent = 'Update Ban';
-      document.getElementById('btnSubmitBanForm').textContent = 'Save Update';
-      document.getElementById('editBanId').value = ban.id;
-      document.getElementById('banName').value = ban.name;
-      document.getElementById('banWhy').value = ban.why || '';
-      document.getElementById('banIsForever').checked = Boolean(ban.isForever);
-      document.getElementById('banDurationDays').value = ban.durationDays || 30;
-      document.getElementById('editKeepStreakNote').classList.remove('hidden');
-      toggleForeverInput();
-      updateFormTargetPreview(ban.startDate);
-      openModal('modalBanForm');
-    }
-
-    function setFormDuration(days) {
-      document.getElementById('banIsForever').checked = false;
-      toggleForeverInput();
-      document.getElementById('banDurationDays').value = days;
-      const editId = document.getElementById('editBanId').value;
-      const existing = appState.bans.find(b => b.id === editId);
-      updateFormTargetPreview(existing ? existing.startDate : null);
-    }
-
-    function toggleForeverInput() {
-      const isForever = document.getElementById('banIsForever').checked;
-      const wrap = document.getElementById('durationInputsWrap');
-      wrap.style.opacity = isForever ? '0.4' : '1';
-      wrap.style.pointerEvents = isForever ? 'none' : 'auto';
-      const editId = document.getElementById('editBanId').value;
-      const existing = appState.bans.find(b => b.id === editId);
-      updateFormTargetPreview(existing ? existing.startDate : null);
-    }
-
-    function updateFormTargetPreview(baseStartIso = null) {
-      const previewEl = document.getElementById('formTargetPreview');
-      const isForever = document.getElementById('banIsForever').checked;
       if (isForever) {
-        previewEl.innerHTML = `Target End Date: <span class="font-medium text-[#2ea043]">Forever ∞</span>`;
-        return;
+        customWrap.classList.add('hidden');
+      } else {
+        customWrap.classList.remove('hidden');
+        daysInput.value = days;
       }
-      const days = Math.max(1, parseInt(document.getElementById('banDurationDays').value || '30', 10));
-      const baseMs = baseStartIso ? new Date(baseStartIso).getTime() : Date.now();
-      const targetIso = new Date(baseMs + days * 86400 * 1000).toISOString();
-      previewEl.innerHTML = `Target End Date: <span class="font-medium text-slate-800 dark:text-slate-200">${formatDateReadable(targetIso)}</span>`;
+
+      document.querySelectorAll('.start-preset-btn').forEach(btn => {
+        const key = btn.dataset.startPreset;
+        const active = (isForever && key === 'forever') || (!isForever && Number(key) === days);
+        btn.className = active
+          ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
+          : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
+      });
     }
 
-    async function handleSaveBan(event) {
-      event.preventDefault();
-      const editId = document.getElementById('editBanId').value;
-      const name = document.getElementById('banName').value.trim();
-      const why = document.getElementById('banWhy').value.trim();
-      const isForever = document.getElementById('banIsForever').checked;
-      const durationDays = isForever ? null : Math.max(1, parseInt(document.getElementById('banDurationDays').value || '30', 10));
+    function onStartDaysManualInput() {
+      document.getElementById('inputStartForever').value = 'false';
+      const val = Number(document.getElementById('inputStartDays').value);
+      document.querySelectorAll('.start-preset-btn').forEach(btn => {
+        const key = btn.dataset.startPreset;
+        const active = key !== 'forever' && Number(key) === val;
+        btn.className = active
+          ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
+          : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
+      });
+    }
 
+    async function handleStartBanSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('inputBanName').value.trim();
       if (!name) return;
 
-      const nowIso = new Date().toISOString();
+      const isForever = document.getElementById('inputStartForever').value === 'true';
+      const durationDays = isForever ? null : Math.max(1, parseInt(document.getElementById('inputStartDays').value, 10) || 30);
+      const reason = document.getElementById('inputBanReason').value.trim();
 
-      if (editId) {
-        const ban = appState.bans.find(b => b.id === editId);
-        if (ban) {
-          ban.name = name;
-          ban.why = why;
-          ban.isForever = isForever;
-          ban.durationDays = durationDays;
-          ban.lastDate = isForever
-            ? null
-            : new Date(new Date(ban.startDate).getTime() + durationDays * 86400 * 1000).toISOString();
-          ban.updatedAt = nowIso;
-        }
-        closeModal('modalBanForm');
-        await checkFinishedBans(false);
-        renderAll();
-        await persistAndSync(`Update ban: ${name}`);
-        showToast('Ban updated.', 'success');
+      const now = new Date();
+      const targetEndDate = isForever
+        ? null
+        : new Date(now.getTime() + durationDays * 86400000).toISOString();
+
+      const newBan = {
+        id: `ban_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        reason,
+        startDate: now.toISOString(),
+        targetEndDate,
+        durationDays,
+        isForever,
+        currentStreakDays: 0,
+        bestStreakDays: 0
+      };
+
+      appState.bans.unshift(newBan);
+      closeStartBanModal();
+      renderAll();
+      await persistAndSync(`Start ban: ${name}`);
+      showToast(`Started ban: "${name}"`);
+    }
+
+    function openBanDetailModal(banId) {
+      const ban = appState.bans.find(b => b.id === banId);
+      if (!ban) return;
+
+      hideCancelConfirm();
+      hideHeatmapTooltip();
+
+      const m = computeBanMetrics(ban, Date.now());
+      document.getElementById('detailBanId').value = ban.id;
+      document.getElementById('detailBanName').textContent = ban.name;
+      document.getElementById('detailLiveTimer').textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+      document.getElementById('detailRemainingText').textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
+      document.getElementById('detailStartDate').textContent = formatShortDate(ban.startDate);
+      document.getElementById('detailEndDate').textContent = ban.isForever ? 'Forever ∞' : formatShortDate(ban.targetEndDate);
+      document.getElementById('detailProgressBar').style.width = `${m.progressPct.toFixed(2)}%`;
+
+      const reasonBox = document.getElementById('detailReasonBox');
+      const reasonText = document.getElementById('detailReasonText');
+      if (ban.reason && ban.reason.trim()) {
+        reasonBox.classList.remove('hidden');
+        reasonText.textContent = ban.reason;
       } else {
-        const newBan = {
-          id: `ban_${Date.now()}`,
-          name,
-          why,
-          startDate: nowIso,
-          lastDate: isForever ? null : new Date(Date.now() + durationDays * 86400 * 1000).toISOString(),
-          durationDays,
-          isForever,
-          currentStreakDays: 0,
-          bestStreakDays: 0,
-          updatedAt: nowIso,
-          history: []
-        };
-        appState.bans.unshift(newBan);
-        closeModal('modalBanForm');
+        reasonBox.classList.add('hidden');
+      }
+
+      document.getElementById('modalBanDetail').classList.remove('hidden');
+      renderBanGithubGraph(ban);
+    }
+
+    function closeBanDetailModal() {
+      hideHeatmapTooltip();
+      hideCancelConfirm();
+      document.getElementById('modalBanDetail').classList.add('hidden');
+    }
+
+    function openUpdateBanModal() {
+      const banId = document.getElementById('detailBanId').value;
+      const ban = appState.bans.find(b => b.id === banId);
+      if (!ban) return;
+
+      document.getElementById('updateBanId').value = ban.id;
+      document.getElementById('updateBanName').value = ban.name;
+      document.getElementById('updateBanReason').value = ban.reason || '';
+
+      const isForever = Boolean(ban.isForever);
+      document.getElementById('updateIsForever').value = isForever ? 'true' : 'false';
+      const currentDays = ban.durationDays || Math.max(1, computeBanMetrics(ban).days + 7);
+      document.getElementById('updateDurationDays').value = currentDays;
+
+      syncUpdateForeverUI(isForever);
+      document.getElementById('modalUpdateBan').classList.remove('hidden');
+    }
+
+    function closeUpdateBanModal() {
+      document.getElementById('modalUpdateBan').classList.add('hidden');
+    }
+
+    function syncUpdateForeverUI(isForever) {
+      const wrap = document.getElementById('updateCustomDaysWrap');
+      const btn = document.getElementById('btnUpdateForever');
+      if (isForever) {
+        wrap.classList.add('hidden');
+        btn.className = 'py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition';
+      } else {
+        wrap.classList.remove('hidden');
+        btn.className = 'py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
+      }
+    }
+
+    function extendUpdateDays(addDays) {
+      document.getElementById('updateIsForever').value = 'false';
+      syncUpdateForeverUI(false);
+      const input = document.getElementById('updateDurationDays');
+      const current = parseInt(input.value, 10) || 0;
+      input.value = current + addDays;
+    }
+
+    function toggleUpdateForever() {
+      const current = document.getElementById('updateIsForever').value === 'true';
+      const next = !current;
+      document.getElementById('updateIsForever').value = next ? 'true' : 'false';
+      syncUpdateForeverUI(next);
+    }
+
+    async function handleUpdateBanSubmit(event) {
+      event.preventDefault();
+      const banId = document.getElementById('updateBanId').value;
+      const banIndex = appState.bans.findIndex(b => b.id === banId);
+      if (banIndex === -1) return;
+
+      const ban = appState.bans[banIndex];
+      const newName = document.getElementById('updateBanName').value.trim();
+      if (!newName) return;
+
+      const isForever = document.getElementById('updateIsForever').value === 'true';
+      const durationDays = isForever ? null : Math.max(1, parseInt(document.getElementById('updateDurationDays').value, 10) || 30);
+      const newReason = document.getElementById('updateBanReason').value.trim();
+
+      // Keep original startDate and active streak intact; only recalculate targetEndDate
+      const startMs = new Date(ban.startDate).getTime();
+      const targetEndDate = isForever
+        ? null
+        : new Date(startMs + durationDays * 86400000).toISOString();
+
+      appState.bans[banIndex] = {
+        ...ban,
+        name: newName,
+        reason: newReason,
+        durationDays,
+        isForever,
+        targetEndDate
+      };
+
+      closeUpdateBanModal();
+      renderAll();
+      openBanDetailModal(banId);
+      await persistAndSync(`Update ban: ${newName}`);
+      await checkFinishedBans(true);
+      showToast(`Updated "${newName}"`);
+    }
+
+    function showCancelConfirm() {
+      document.getElementById('cancelConfirmBox').classList.remove('hidden');
+    }
+
+    function hideCancelConfirm() {
+      const box = document.getElementById('cancelConfirmBox');
+      if (box) box.classList.add('hidden');
+    }
+
+    async function confirmCancelActiveBan() {
+      const banId = document.getElementById('detailBanId').value;
+      const idx = appState.bans.findIndex(b => b.id === banId);
+      if (idx === -1) return;
+
+      const ban = appState.bans[idx];
+      const nowIso = new Date().toISOString();
+      const m = computeBanMetrics(ban, Date.now());
+
+      const archivedEntry = {
+        ...ban,
+        endedAt: nowIso,
+        finalStreakDays: m.days,
+        bestStreakDays: m.bestStreakDays,
+        status: 'cancelled'
+      };
+
+      appState.savedBans = [archivedEntry, ...(appState.savedBans || [])];
+      appState.bans.splice(idx, 1);
+
+      closeBanDetailModal();
+      renderAll();
+      await persistAndSync(`Cancel ban: ${ban.name}`);
+      showToast(`Cancelled & saved "${ban.name}"`);
+    }
+
+    async function checkFinishedBans(shouldSync = true) {
+      if (!appState.bans || appState.bans.length === 0) return;
+
+      const nowMs = Date.now();
+      const nowIso = new Date(nowMs).toISOString();
+      const stillActive = [];
+      const newlyFinished = [];
+
+      appState.bans.forEach(ban => {
+        const m = computeBanMetrics(ban, nowMs);
+        if (m.isCompleted) {
+          newlyFinished.push({
+            ...ban,
+            endedAt: ban.targetEndDate || nowIso,
+            finalStreakDays: ban.durationDays || m.days,
+            bestStreakDays: Math.max(m.bestStreakDays, ban.durationDays || m.days),
+            status: 'completed'
+          });
+        } else {
+          stillActive.push(ban);
+        }
+      });
+
+      if (newlyFinished.length > 0) {
+        appState.bans = stillActive;
+        appState.savedBans = [...newlyFinished, ...(appState.savedBans || [])];
+
+        const detailId = document.getElementById('detailBanId')?.value;
+        if (newlyFinished.some(b => b.id === detailId)) {
+          closeBanDetailModal();
+        }
+
         renderAll();
-        await persistAndSync(`Start ban: ${name}`);
-        showToast(`Started ban: "${name}"`, 'success');
+        if (shouldSync) {
+          await persistAndSync(`Completed ${newlyFinished.length} ban(s)`);
+        } else {
+          saveLocalState();
+        }
+        showToast(`Completed & saved: "${newlyFinished[0].name}"`);
       }
     }
 
     // -------------------------------------------------------------------------
-    // 7. GITHUB REST API BACKEND SYNC
+    // 8. GITHUB JSON BACKEND (SMART PULL + PUSH + AUTO BRANCH DETECTION)
     // -------------------------------------------------------------------------
     function loadGithubConfig() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_GH);
-        if (raw) {
-          githubConfig = { ...githubConfig, ...JSON.parse(raw) };
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          githubConfig = { ...githubConfig, ...parsed };
         }
       } catch (e) {
-        console.error('Error loading GitHub config:', e);
+        console.error('Failed to load GitHub config:', e);
+      }
+    }
+
+    function saveGithubConfig() {
+      try {
+        localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
+      } catch (e) {
+        console.error('Failed to save GitHub config:', e);
       }
     }
 
     function isGithubConfigured() {
-      return Boolean(githubConfig.owner && githubConfig.repo && githubConfig.token && githubConfig.path);
+      return Boolean(githubConfig.owner && githubConfig.repo && githubConfig.path && githubConfig.token);
     }
 
     function openGithubModal() {
@@ -1191,8 +1577,40 @@
       document.getElementById('ghPath').value = githubConfig.path || 'mybans.json';
       document.getElementById('ghBranch').value = githubConfig.branch || 'master';
       document.getElementById('ghToken').value = githubConfig.token || '';
-      document.getElementById('ghFeedbackBox').classList.add('hidden');
-      openModal('modalGithub');
+      setGhFeedback('', 'hidden');
+      document.getElementById('modalGithub').classList.remove('hidden');
+    }
+
+    function closeGithubModal() {
+      document.getElementById('modalGithub').classList.add('hidden');
+    }
+
+    async function handleSaveAndSyncGithub(event) {
+      event.preventDefault();
+      const owner = document.getElementById('ghOwner').value.trim();
+      const repo = document.getElementById('ghRepo').value.trim();
+      const path = (document.getElementById('ghPath').value.trim() || 'mybans.json').replace(/^\/+/, '');
+      const branch = document.getElementById('ghBranch').value.trim() || 'master';
+      const token = document.getElementById('ghToken').value.trim();
+
+      if (!owner || !repo || !token) {
+        setGhFeedback('Please enter your GitHub username, repository name, and token.', 'error');
+        return;
+      }
+
+      const isNewConnection = githubConfig.owner !== owner || githubConfig.repo !== repo || githubConfig.path !== path;
+      githubConfig = {
+        owner,
+        repo,
+        path,
+        branch,
+        token,
+        sha: isNewConnection ? null : githubConfig.sha
+      };
+      saveGithubConfig();
+      updateSyncStatusUI();
+
+      await smartSyncGithub(true, true);
     }
 
     function disconnectGithub() {
@@ -1202,273 +1620,15 @@
         path: 'mybans.json',
         branch: 'master',
         token: '',
-        lastSha: null
+        sha: null
       };
-      localStorage.removeItem(STORAGE_KEY_GH);
-      document.getElementById('ghOwner').value = '';
-      document.getElementById('ghRepo').value = '';
-      document.getElementById('ghPath').value = 'mybans.json';
-      document.getElementById('ghBranch').value = 'master';
-      document.getElementById('ghToken').value = '';
-      updateSyncStatusUI();
-      setGhFeedback('Disconnected from GitHub. Data is saved locally.', 'info');
-      showToast('Disconnected from GitHub.', 'info');
-    }
-
-    async function saveGithubConfig() {
-      githubConfig.owner = document.getElementById('ghOwner').value.trim();
-      githubConfig.repo = document.getElementById('ghRepo').value.trim();
-      githubConfig.path = document.getElementById('ghPath').value.trim() || 'mybans.json';
-      githubConfig.branch = document.getElementById('ghBranch').value.trim() || 'master';
-      githubConfig.token = document.getElementById('ghToken').value.trim();
-      githubConfig.lastSha = null;
-
-      localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
-      updateSyncStatusUI();
-
-      if (!isGithubConfigured()) {
-        setGhFeedback('Please fill in Username, Repository, Path, and Token.', 'error');
-        return;
-      }
-
-      await smartSyncGithub(true, true);
-    }
-
-    async function fetchRemoteFile(owner, repo, path, branch, token) {
-      const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}&t=${Date.now()}`;
-      return fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
-    }
-
-    async function smartSyncGithub(showFeedback = false, isInitialConnect = false) {
-      if (!isGithubConfigured()) {
-        if (showFeedback) setGhFeedback('Configure GitHub credentials first.', 'error');
-        return;
-      }
-
-      setSyncState('syncing', 'Syncing...');
-      const { owner, repo, path, token } = githubConfig;
-      let branch = githubConfig.branch;
-
       try {
-        let res = await fetchRemoteFile(owner, repo, path, branch, token);
-
-        // If 404 on initial setup, check alternate default branch (master <-> main) before creating a new file
-        if (res.status === 404 && isInitialConnect) {
-          const altBranch = branch === 'main' ? 'master' : (branch === 'master' ? 'main' : null);
-          if (altBranch) {
-            const altRes = await fetchRemoteFile(owner, repo, path, altBranch, token);
-            if (altRes.ok) {
-              branch = altBranch;
-              githubConfig.branch = altBranch;
-              const branchInput = document.getElementById('ghBranch');
-              if (branchInput) branchInput.value = altBranch;
-              res = altRes;
-            }
-          }
-        }
-
-        if (res.status === 404) {
-          await pushToGithub(showFeedback, 'Initialize mybans.json');
-          return;
-        }
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || `HTTP ${res.status}`);
-        }
-
-        const data = await res.json();
-        const remoteSha = data.sha;
-        const decoded = base64ToUtf8(data.content);
-        const parsed = JSON.parse(decoded);
-
-        const localUpdatedMs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
-        const remoteUpdatedMs = parsed?.lastUpdated ? new Date(parsed.lastUpdated).getTime() : 0;
-
-        // On initial connect, always pull remote bans first (and merge any unsynced local bans if created offline)
-        if (isInitialConnect && parsed && Array.isArray(parsed.bans)) {
-          const remoteIds = new Set(parsed.bans.map(b => b.id));
-          const extraLocalBans = appState.bans.filter(b => !remoteIds.has(b.id));
-          const remoteSavedIds = new Set((parsed.savedBans || []).map(b => b.id));
-          const extraLocalSaved = (appState.savedBans || []).filter(b => !remoteSavedIds.has(b.id));
-
-          githubConfig.lastSha = remoteSha;
-          appState.bans = [...extraLocalBans, ...parsed.bans];
-          appState.savedBans = [...extraLocalSaved, ...(parsed.savedBans || [])];
-          appState.lastUpdated = parsed.lastUpdated || new Date().toISOString();
-          appState.lastSyncedAt = new Date().toISOString();
-          localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
-          saveLocalState();
-          renderAll();
-
-          if (extraLocalBans.length > 0 || extraLocalSaved.length > 0) {
-            await pushToGithub(showFeedback, 'Merge local bans with GitHub');
-            return;
-          }
-
-          hasUnsyncedLocalChanges = false;
-          setSyncState('synced', 'Synced ✓');
-          if (showFeedback) {
-            setGhFeedback(`Loaded ${appState.bans.length} active & ${(appState.savedBans || []).length} saved ban(s) from ${branch}.`, 'success');
-            showToast('Loaded your bans from GitHub!', 'success');
-          }
-          return;
-        }
-
-        if (hasUnsyncedLocalChanges || (localUpdatedMs > remoteUpdatedMs && appState.bans.length > 0)) {
-          githubConfig.lastSha = remoteSha;
-          await pushToGithub(showFeedback, 'Sync MyBans');
-          return;
-        }
-
-        if (parsed && Array.isArray(parsed.bans)) {
-          githubConfig.lastSha = remoteSha;
-          appState.bans = parsed.bans;
-          appState.savedBans = Array.isArray(parsed.savedBans) ? parsed.savedBans : (appState.savedBans || []);
-          appState.lastUpdated = parsed.lastUpdated || appState.lastUpdated;
-          appState.lastSyncedAt = new Date().toISOString();
-          hasUnsyncedLocalChanges = false;
-          localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
-          saveLocalState();
-          renderAll();
-        }
-
-        setSyncState('synced', 'Synced ✓');
-        if (showFeedback) {
-          setGhFeedback(`Synced ${appState.bans.length} active & ${(appState.savedBans || []).length} saved ban(s).`, 'success');
-          showToast('Synced with GitHub!', 'success');
-        }
-      } catch (err) {
-        console.error('GitHub Sync Error:', err);
-        setSyncState('error', 'Sync Error');
-        if (showFeedback) setGhFeedback(`GitHub Error: ${err.message}`, 'error');
+        localStorage.removeItem(STORAGE_KEY_GH);
+      } catch (e) {
+        // Ignore
       }
-    }
-
-    async function pushToGithub(showFeedback = false, commitMessage = 'Update mybans.json') {
-      if (!isGithubConfigured()) {
-        if (showFeedback) setGhFeedback('Configure GitHub credentials first.', 'error');
-        return;
-      }
-
-      setSyncState('syncing', 'Syncing...');
-      const { owner, repo, path, branch, token } = githubConfig;
-      const baseUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
-
-      try {
-        const headRes = await fetch(`${baseUrl}?ref=${encodeURIComponent(branch)}&t=${Date.now()}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json'
-          }
-        });
-
-        let sha = githubConfig.lastSha;
-        if (headRes.ok) {
-          const headJson = await headRes.json();
-          sha = headJson.sha;
-        } else if (headRes.status === 404) {
-          sha = null;
-        }
-
-        const payloadObj = buildNormalizedExportObject();
-        const jsonPretty = JSON.stringify(payloadObj, null, 2);
-
-        const body = {
-          message: commitMessage,
-          content: utf8ToBase64(jsonPretty),
-          branch
-        };
-        if (sha) body.sha = sha;
-
-        const putRes = await fetch(baseUrl, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-
-        if (!putRes.ok) {
-          const errData = await putRes.json().catch(() => ({}));
-          throw new Error(errData.message || `HTTP ${putRes.status}`);
-        }
-
-        const putData = await putRes.json();
-        githubConfig.lastSha = putData.content?.sha || sha;
-        appState.lastSyncedAt = new Date().toISOString();
-        hasUnsyncedLocalChanges = false;
-        localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
-        saveLocalState();
-        renderAll();
-
-        setSyncState('synced', 'Synced ✓');
-        if (showFeedback) {
-          setGhFeedback(`Synced ${path} with ${owner}/${repo} (${branch})!`, 'success');
-          showToast('Synced with GitHub!', 'success');
-        }
-      } catch (err) {
-        console.error('GitHub Push Error:', err);
-        setSyncState('error', 'Sync Failed');
-        if (showFeedback) setGhFeedback(`GitHub Sync Error: ${err.message}`, 'error');
-        else showToast(`GitHub sync failed: ${err.message}`, 'error');
-      }
-    }
-
-    function updateSyncStatusUI() {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncStatusText');
-      if (!dot || !text) return;
-
-      if (!isGithubConfigured()) {
-        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
-        text.textContent = 'Local JSON';
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-[#2ea043]';
-        text.textContent = githubConfig.repo || 'GitHub';
-      }
-    }
-
-    function setSyncState(state, label) {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncStatusText');
-      if (!dot || !text) return;
-
-      if (state === 'syncing') {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 live-dot';
-        text.textContent = label || 'Syncing...';
-      } else if (state === 'synced') {
-        dot.className = 'w-2 h-2 rounded-full bg-[#2ea043]';
-        text.textContent = label || 'Synced ✓';
-      } else if (state === 'error') {
-        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
-        text.textContent = label || 'Sync Error';
-      } else {
-        updateSyncStatusUI();
-      }
-    }
-
-    function setGhFeedback(message, type = 'info') {
-      const box = document.getElementById('ghFeedbackBox');
-      if (!box) return;
-      box.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/30', 'bg-[#2ea043]/10', 'text-[#2ea043]', 'border-[#2ea043]/30', 'bg-slate-500/10', 'text-slate-400', 'border-slate-500/30');
-      box.classList.add('border');
-
-      if (type === 'error') {
-        box.classList.add('bg-rose-500/10', 'text-rose-500', 'border-rose-500/30');
-      } else if (type === 'success') {
-        box.classList.add('bg-[#2ea043]/10', 'text-[#2ea043]', 'border-[#2ea043]/30');
-      } else {
-        box.classList.add('bg-slate-500/10', 'text-slate-600', 'dark:text-slate-300', 'border-slate-500/30');
-      }
-      box.textContent = message;
+      updateSyncStatusUI();
+      setGhFeedback('Disconnected from GitHub. Using local browser storage.', 'info');
     }
 
     function utf8ToBase64(str) {
@@ -1481,7 +1641,7 @@
     }
 
     function base64ToUtf8(b64) {
-      const clean = String(b64 || '').replace(/\s/g, '');
+      const clean = b64.replace(/\s/g, '');
       const binary = atob(clean);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
@@ -1490,141 +1650,312 @@
       return new TextDecoder().decode(bytes);
     }
 
-    // -------------------------------------------------------------------------
-    // 8. SAVED BANS ARCHIVE & JSON INSPECTOR
-    // -------------------------------------------------------------------------
-    function openJsonModal() {
-      const savedContainer = document.getElementById('savedBansList');
-      const saved = appState.savedBans || [];
+    async function fetchRemoteFileFromBranch(branchName) {
+      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${githubConfig.path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branchName)}&_t=${Date.now()}`;
+      return fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${githubConfig.token}`,
+          'Accept': 'application/vnd.github+json'
+        }
+      });
+    }
 
-      if (saved.length === 0) {
-        savedContainer.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400 py-2">No finished or cancelled bans archived yet.</p>`;
+    async function smartSyncGithub(showModalFeedback = false, closeOnSuccess = false) {
+      if (!isGithubConfigured() || isSyncInProgress) return;
+      isSyncInProgress = true;
+      setSyncState('syncing', 'Syncing...');
+      if (showModalFeedback) setGhFeedback('Syncing with GitHub...', 'info');
+
+      try {
+        let res = await fetchRemoteFileFromBranch(githubConfig.branch);
+
+        // Auto-detect master vs main if file wasn't found on the typed branch
+        if (res.status === 404 && (githubConfig.branch === 'main' || githubConfig.branch === 'master')) {
+          const fallbackBranch = githubConfig.branch === 'main' ? 'master' : 'main';
+          const fallbackRes = await fetchRemoteFileFromBranch(fallbackBranch);
+          if (fallbackRes.ok) {
+            githubConfig.branch = fallbackBranch;
+            const branchInput = document.getElementById('ghBranch');
+            if (branchInput) branchInput.value = fallbackBranch;
+            saveGithubConfig();
+            res = fallbackRes;
+          }
+        }
+
+        if (res.status === 404) {
+          // File doesn't exist in repo yet -> create it from current local state
+          await pushToGithub(showModalFeedback, 'Initialize mybans.json');
+          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 550);
+          return;
+        }
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || `GitHub API error (${res.status})`);
+        }
+
+        const fileJson = await res.json();
+        githubConfig.sha = fileJson.sha || null;
+        saveGithubConfig();
+
+        const decodedText = base64ToUtf8(fileJson.content || '');
+        const remoteData = JSON.parse(decodedText);
+
+        const remoteBans = Array.isArray(remoteData.bans) ? remoteData.bans : [];
+        const remoteSaved = Array.isArray(remoteData.savedBans) ? remoteData.savedBans : [];
+        const localBans = Array.isArray(appState.bans) ? appState.bans : [];
+        const localSaved = Array.isArray(appState.savedBans) ? appState.savedBans : [];
+
+        const remoteUpdatedMs = remoteData.lastUpdated ? new Date(remoteData.lastUpdated).getTime() : 0;
+        const localUpdatedMs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
+
+        const localIsEmpty = localBans.length === 0 && localSaved.length === 0;
+
+        if (localIsEmpty || (!hasUnsyncedLocalChanges && remoteUpdatedMs >= localUpdatedMs)) {
+          // Adopt remote data cleanly (prevents fresh device from overwriting existing school/PC bans)
+          appState = {
+            app: 'MyBans',
+            version: 2,
+            lastUpdated: remoteData.lastUpdated || new Date().toISOString(),
+            lastSyncedAt: new Date().toISOString(),
+            bans: remoteBans,
+            savedBans: remoteSaved
+          };
+          hasUnsyncedLocalChanges = false;
+          saveLocalState();
+          renderAll();
+
+          setSyncState('synced', 'Synced');
+          if (showModalFeedback) {
+            setGhFeedback(`Synced! Loaded ${remoteBans.length} active ban(s) from ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+          }
+          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 650);
+        } else {
+          // Local has newer unsynced edits -> push up with latest SHA
+          await pushToGithub(showModalFeedback, 'Sync MyBans updates');
+          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 650);
+        }
+      } catch (err) {
+        console.error('GitHub smart sync error:', err);
+        setSyncState('error', 'Sync Error');
+        if (showModalFeedback) {
+          setGhFeedback(`Sync failed: ${err.message}`, 'error');
+        }
+      } finally {
+        isSyncInProgress = false;
+      }
+    }
+
+    async function pushToGithub(showModalFeedback = false, commitMessage = 'Update mybans.json') {
+      if (!isGithubConfigured()) return;
+      setSyncState('syncing', 'Syncing...');
+
+      try {
+        // Ensure we have the latest file SHA before PUT
+        if (!githubConfig.sha) {
+          const checkRes = await fetchRemoteFileFromBranch(githubConfig.branch);
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            githubConfig.sha = checkData.sha || null;
+          }
+        }
+
+        appState.lastSyncedAt = new Date().toISOString();
+        const exportObj = buildNormalizedExportObject();
+        const contentBase64 = utf8ToBase64(JSON.stringify(exportObj, null, 2));
+
+        const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${githubConfig.path.split('/').map(encodeURIComponent).join('/')}`;
+        const body = {
+          message: commitMessage,
+          content: contentBase64,
+          branch: githubConfig.branch
+        };
+        if (githubConfig.sha) {
+          body.sha = githubConfig.sha;
+        }
+
+        let putRes = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${githubConfig.token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        // Handle SHA conflict by fetching fresh SHA once and retrying
+        if (putRes.status === 409 || putRes.status === 422) {
+          const freshRes = await fetchRemoteFileFromBranch(githubConfig.branch);
+          if (freshRes.ok) {
+            const freshJson = await freshRes.json();
+            githubConfig.sha = freshJson.sha;
+            body.sha = githubConfig.sha;
+            putRes = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                'Authorization': `Bearer ${githubConfig.token}`,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            });
+          }
+        }
+
+        if (!putRes.ok) {
+          const errData = await putRes.json().catch(() => ({}));
+          throw new Error(errData.message || `GitHub write error (${putRes.status})`);
+        }
+
+        const resultData = await putRes.json();
+        githubConfig.sha = resultData?.content?.sha || githubConfig.sha;
+        saveGithubConfig();
+
+        hasUnsyncedLocalChanges = false;
+        saveLocalState();
+        setSyncState('synced', 'Synced');
+        if (showModalFeedback) {
+          setGhFeedback(`Saved & synced to ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+        }
+      } catch (err) {
+        console.error('GitHub push error:', err);
+        setSyncState('error', 'Sync Error');
+        if (showModalFeedback) {
+          setGhFeedback(`Push failed: ${err.message}`, 'error');
+        }
+      }
+    }
+
+    function updateSyncStatusUI() {
+      if (!isGithubConfigured()) {
+        setSyncState('local', 'Local JSON');
+      } else if (hasUnsyncedLocalChanges) {
+        setSyncState('pending', 'Unsynced');
       } else {
-        savedContainer.innerHTML = saved.map(item => `
-          <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#0d1117] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold truncate">${escapeHtml(item.name)}</span>
-                <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
-                  item.status === 'finished'
-                    ? 'bg-[#2ea043]/15 text-[#2ea043]'
-                    : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                }">${escapeHtml(item.status || 'saved')}</span>
-              </div>
-              <p class="text-[11px] font-mono text-slate-500 mt-0.5">
-                ${formatDateReadable(item.startDate)} → ${formatDateReadable(item.endedAt || item.lastDate)}
-              </p>
-            </div>
-            <span class="text-xs font-mono font-bold text-[#2ea043] shrink-0">${item.streakDays || 0}d</span>
-          </div>
-        `).join('');
+        setSyncState('synced', 'Synced');
+      }
+    }
+
+    function setSyncState(state, label) {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncLabel');
+      if (text) text.textContent = label;
+      if (!dot) return;
+
+      dot.className = 'w-2 h-2 rounded-full shrink-0 ';
+      if (state === 'synced') {
+        dot.className += 'bg-[#2ea043]';
+      } else if (state === 'syncing') {
+        dot.className += 'bg-sky-400 animate-pulse';
+      } else if (state === 'error') {
+        dot.className += 'bg-rose-500';
+      } else {
+        dot.className += 'bg-amber-400';
+      }
+    }
+
+    function setGhFeedback(message, type) {
+      const box = document.getElementById('ghFeedback');
+      if (!box) return;
+      if (type === 'hidden' || !message) {
+        box.classList.add('hidden');
+        return;
       }
 
-      const pretty = JSON.stringify(buildNormalizedExportObject(), null, 2);
-      document.getElementById('jsonPreviewCode').textContent = pretty;
-      openModal('modalJson');
+      box.classList.remove('hidden');
+      box.textContent = message;
+
+      if (type === 'error') {
+        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30';
+      } else if (type === 'success') {
+        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-[#2ea043]/15 text-[#2ea043] border border-[#2ea043]/30';
+      } else {
+        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e] border border-[#d0d7de] dark:border-[#30363d]';
+      }
     }
 
-    function downloadJsonFile() {
-      const pretty = JSON.stringify(buildNormalizedExportObject(), null, 2);
-      const blob = new Blob([pretty], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mybans.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('Downloaded mybans.json', 'success');
-    }
-
-    function copyJsonToClipboard() {
-      const pretty = JSON.stringify(buildNormalizedExportObject(), null, 2);
-      const ta = document.createElement('textarea');
-      ta.value = pretty;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('JSON copied to clipboard!', 'success');
+    // -------------------------------------------------------------------------
+    // 9. LOCAL JSON EXPORT / IMPORT & HELPERS
+    // -------------------------------------------------------------------------
+    function exportJsonFile() {
+      try {
+        const dataStr = JSON.stringify(buildNormalizedExportObject(), null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mybans.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Exported mybans.json');
+      } catch (e) {
+        showToast('Failed to export JSON file');
+      }
     }
 
     function importJsonFile(event) {
       const file = event.target.files?.[0];
       if (!file) return;
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
-          const importedBans = Array.isArray(parsed) ? parsed : parsed?.bans;
-          if (!Array.isArray(importedBans)) {
-            throw new Error('Invalid JSON structure: expected "bans" array.');
+          if (!parsed || !Array.isArray(parsed.bans)) {
+            throw new Error('Invalid MyBans JSON format.');
           }
-          appState.bans = importedBans;
-          appState.savedBans = Array.isArray(parsed?.savedBans) ? parsed.savedBans : [];
-          await checkFinishedBans(false);
+          appState = {
+            app: 'MyBans',
+            version: 2,
+            lastUpdated: new Date().toISOString(),
+            lastSyncedAt: appState.lastSyncedAt || null,
+            bans: parsed.bans,
+            savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
+          };
           renderAll();
-          openJsonModal();
           await persistAndSync('Import mybans.json');
-          showToast(`Imported ${importedBans.length} active ban(s)!`, 'success');
+          closeGithubModal();
+          showToast(`Imported ${appState.bans.length} active ban(s)`);
         } catch (err) {
-          showToast(`Import failed: ${err.message}`, 'error');
+          setGhFeedback(`Import failed: ${err.message}`, 'error');
+        } finally {
+          event.target.value = '';
         }
       };
       reader.readAsText(file);
-      event.target.value = '';
     }
 
-    // -------------------------------------------------------------------------
-    // 9. MODAL & TOAST UTILITIES
-    // -------------------------------------------------------------------------
-    function openModal(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.remove('hidden');
-      el.classList.add('flex');
+    function showToast(msg) {
+      const banner = document.getElementById('toastBanner');
+      const text = document.getElementById('toastMessage');
+      if (!banner || !text) return;
+
+      text.textContent = msg;
+      banner.classList.remove('hidden');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        hideToast();
+      }, 3600);
     }
 
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.add('hidden');
-      el.classList.remove('flex');
-    }
-
-    document.querySelectorAll('[id^="modal"]').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal(modal.id);
-      });
-    });
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      const colors = {
-        success: 'bg-[#2ea043] text-white',
-        error: 'bg-slate-900 text-white border border-slate-700',
-        info: 'bg-slate-900 dark:bg-slate-800 text-white border border-slate-700'
-      };
-      toast.className = `pointer-events-auto px-4 py-3 rounded-xl text-xs sm:text-sm font-medium shadow-xl transition-all duration-300 ${colors[type] || colors.info}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(8px)';
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
+    function hideToast() {
+      const banner = document.getElementById('toastBanner');
+      if (banner) banner.classList.add('hidden');
     }
 
     function escapeHtml(str) {
-      if (!str) return '';
+      if (str === null || str === undefined) return '';
       return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&#39;');
     }
   </script>
 </body>
