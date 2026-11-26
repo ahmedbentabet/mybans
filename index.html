@@ -42,6 +42,9 @@
       -webkit-tap-highlight-color: transparent;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
+    html.dark {
+      color-scheme: dark;
+    }
 
     /* Safe-Area Insets for Modern Phones (Notches & Home Bars) */
     .safe-top {
@@ -58,15 +61,16 @@
     .heatmap-scroll {
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
+      scrollbar-color: rgba(139, 148, 158, 0.35) transparent;
     }
     .heatmap-scroll::-webkit-scrollbar {
-      height: 6px;
+      height: 5px;
     }
     .heatmap-scroll::-webkit-scrollbar-track {
       background: transparent;
     }
     .heatmap-scroll::-webkit-scrollbar-thumb {
-      background: rgba(139, 148, 158, 0.3);
+      background: rgba(139, 148, 158, 0.35);
       border-radius: 9999px;
     }
 
@@ -134,6 +138,27 @@
 
       <!-- Right Controls -->
       <div class="flex items-center gap-2 shrink-0">
+        <!-- Achievements Button -->
+        <button
+          id="btnOpenAchievements"
+          type="button"
+          onclick="openAchievementsModal()"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 min-h-[40px] rounded-xl text-xs sm:text-sm font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#161b22] hover:bg-[#eaeef2] dark:hover:bg-[#21262d] active:scale-[0.98] transition"
+          title="View Completed Bans & Achievements"
+          aria-label="Achievements"
+        >
+          <svg class="w-4 h-4 text-[#2ea043] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+            <path d="M4 22h16"></path>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+          </svg>
+          <span class="hidden sm:inline">Achievements</span>
+          <span id="achievementsCountBadge" class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-[#2ea043]/15 text-[#2ea043] tabular-nums">0</span>
+        </button>
+
         <!-- GitHub Sync Pill -->
         <button
           id="btnOpenGithub"
@@ -262,7 +287,7 @@
   <!-- ===================================================================== -->
   <div
     id="modalStartBan"
-    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     onclick="if(event.target === this) closeStartBanModal()"
   >
     <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
@@ -377,10 +402,10 @@
   <!-- ===================================================================== -->
   <div
     id="modalBanDetail"
-    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     onclick="if(event.target === this) closeBanDetailModal()"
   >
-    <div class="modal-sheet w-full sm:max-w-3xl rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+    <div class="modal-sheet w-full sm:max-w-[820px] rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
       <!-- Mobile Bottom Sheet Drag Indicator -->
       <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
         <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
@@ -389,11 +414,12 @@
       <!-- Detail Header -->
       <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-start justify-between gap-3 shrink-0">
         <div class="min-w-0">
-          <div class="flex items-center gap-2 mb-1">
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
             <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#2ea043]/15 text-[#2ea043]">
               <span class="w-1.5 h-1.5 rounded-full bg-[#2ea043]"></span>
               Active Ban
             </span>
+            <span id="detailTotalDuration" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e]"></span>
           </div>
           <h3 id="detailBanName" class="text-lg sm:text-xl font-bold break-words leading-snug"></h3>
         </div>
@@ -423,12 +449,12 @@
 
           <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
             <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">Start Date</div>
-            <div id="detailStartDate" class="text-xs sm:text-sm font-medium"></div>
+            <div id="detailStartDate" class="text-[11px] sm:text-xs font-medium leading-snug whitespace-nowrap"></div>
           </div>
 
           <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
             <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mb-0.5">End Date</div>
-            <div id="detailEndDate" class="text-xs sm:text-sm font-medium"></div>
+            <div id="detailEndDate" class="text-[11px] sm:text-xs font-medium leading-snug whitespace-nowrap"></div>
           </div>
         </div>
 
@@ -529,7 +555,7 @@
   <!-- ===================================================================== -->
   <div
     id="modalUpdateBan"
-    class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     onclick="if(event.target === this) closeUpdateBanModal()"
   >
     <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
@@ -640,7 +666,7 @@
   <!-- ===================================================================== -->
   <div
     id="modalGithub"
-    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     onclick="if(event.target === this) closeGithubModal()"
   >
     <div class="modal-sheet w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
@@ -673,6 +699,7 @@
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
+              value="ahmedbentabet"
               placeholder="ahmedbentabet"
               class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
             />
@@ -685,6 +712,7 @@
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
+              value="mybans-data"
               placeholder="mybans-data"
               class="w-full px-3 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
             />
@@ -777,6 +805,84 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- MODAL 5: ACHIEVEMENTS & ARCHIVED BANS                                 -->
+  <!-- ===================================================================== -->
+  <div
+    id="modalAchievements"
+    class="hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    onclick="if(event.target === this) closeAchievementsModal()"
+  >
+    <div class="modal-sheet w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] shadow-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <!-- Mobile Drag Handle -->
+      <div class="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-[#d0d7de] dark:bg-[#30363d]"></div>
+      </div>
+
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 sm:py-4 border-b border-[#d0d7de] dark:border-[#30363d] flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-[#2ea043]/15 text-[#2ea043] flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold leading-tight">Achievements</h3>
+            <p class="text-[11px] text-[#656d76] dark:text-[#8b949e]">Finished bans saved in your JSON archive</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="closeAchievementsModal()"
+          class="w-9 h-9 rounded-xl flex items-center justify-center text-[#656d76] dark:text-[#8b949e] hover:bg-[#f6f8fa] dark:hover:bg-[#21262d]"
+          aria-label="Close"
+        >✕</button>
+      </div>
+
+      <!-- Summary & Filter Tabs -->
+      <div class="px-5 pt-4 pb-2 shrink-0 space-y-3">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e]">Completed Bans</div>
+            <div id="achTotalCompleted" class="text-base sm:text-lg font-bold text-[#2ea043] tabular-nums">0</div>
+          </div>
+          <div class="p-3 rounded-xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117]">
+            <div class="text-[11px] text-[#656d76] dark:text-[#8b949e]">Total Ban Time Won</div>
+            <div id="achTotalTimeWon" class="text-base sm:text-lg font-bold tabular-nums">0h</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="tabAchCompleted"
+            onclick="setAchievementsTab('completed')"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition"
+          >
+            Completed
+          </button>
+          <button
+            type="button"
+            id="tabAchCancelled"
+            onclick="setAchievementsTab('cancelled')"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] text-[#656d76] dark:text-[#8b949e] hover:border-[#2ea043] transition"
+          >
+            Cancelled
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable List -->
+      <div id="achievementsListContainer" class="p-5 pt-2 safe-bottom overflow-y-auto overscroll-contain flex-1 space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- APPLICATION LOGIC                                                     -->
   <!-- ===================================================================== -->
   <script>
@@ -797,907 +903,45 @@
     };
 
     let githubConfig = {
-      owner: '',
-      repo: '',
+      owner: 'ahmedbentabet',
+      repo: 'mybans-data',
       path: 'mybans.json',
       branch: 'master',
       token: '',
       sha: null
     };
-
-    let hasUnsyncedLocalChanges = false;
-    let isSyncInProgress = false;
-    let liveTickerInterval = null;
-    let toastTimeout = null;
-
-    // -------------------------------------------------------------------------
-    // 2. INITIALIZATION & THEME
-    // -------------------------------------------------------------------------
-    window.addEventListener('DOMContentLoaded', async () => {
-      initTheme();
-      loadLocalState();
-      loadGithubConfig();
-      renderAll();
-      startLiveTicker();
-      startAutoSyncListeners();
-
-      if (isGithubConfigured()) {
-        await smartSyncGithub(false, false);
-      }
-      await checkFinishedBans(true);
-    });
-
-    function initTheme() {
-      try {
-        const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-        applyTheme(isDark);
-      } catch (e) {
-        applyTheme(true);
-      }
-    }
-
-    function applyTheme(isDark) {
-      const root = document.documentElement;
-      const metaTheme = document.getElementById('metaThemeColor');
-      if (isDark) {
-        root.classList.add('dark');
-        if (metaTheme) metaTheme.setAttribute('content', '#0d1117');
-      } else {
-        root.classList.remove('dark');
-        if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
-      }
-      try {
-        localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
-      } catch (e) {
-        // Ignore storage errors
-      }
-    }
-
-    function toggleTheme() {
-      const isCurrentlyDark = document.documentElement.classList.contains('dark');
-      applyTheme(!isCurrentlyDark);
-    }
-
-    // -------------------------------------------------------------------------
-    // 3. DATE & STREAK CALCULATIONS
-    // -------------------------------------------------------------------------
-    function computeBanMetrics(ban, nowMs = Date.now()) {
-      const startMs = new Date(ban.startDate).getTime();
-      const elapsedMs = Math.max(0, nowMs - startMs);
-
-      const totalSeconds = Math.floor(elapsedMs / 1000);
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-
-      const bestStreakDays = Math.max(Number(ban.bestStreakDays || 0), days);
-
-      if (ban.isForever || !ban.targetEndDate) {
-        return {
-          days,
-          hours,
-          minutes,
-          seconds,
-          bestStreakDays,
-          remainingMs: Infinity,
-          progressPct: 100,
-          isCompleted: false
-        };
-      }
-
-      const endMs = new Date(ban.targetEndDate).getTime();
-      const totalDurationMs = Math.max(1000, endMs - startMs);
-      const remainingMs = Math.max(0, endMs - nowMs);
-      const progressPct = Math.min(100, Math.max(0, (elapsedMs / totalDurationMs) * 100));
-      const isCompleted = nowMs >= endMs;
-
-      return {
-        days,
-        hours,
-        minutes,
-        seconds,
-        bestStreakDays,
-        remainingMs,
-        progressPct,
-        isCompleted
-      };
-    }
-
-    function formatDurationCompact(ms) {
-      if (!isFinite(ms)) return 'Forever ∞';
-      if (ms <= 0) return '0s';
-      const totalSec = Math.floor(ms / 1000);
-      const d = Math.floor(totalSec / 86400);
-      const h = Math.floor((totalSec % 86400) / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-      if (d > 0) return `${d}d ${h}h`;
-      if (h > 0) return `${h}h ${m}m`;
-      return `${m}m ${String(s).padStart(2, '0')}s`;
-    }
-
-    function formatShortDate(isoStr) {
-      if (!isoStr) return '—';
-      try {
-        const d = new Date(isoStr);
-        const datePart = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        const timePart = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-        return `${datePart} · ${timePart}`;
-      } catch (e) {
-        return isoStr;
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 4. LOCAL STORAGE, NORMALIZATION & SYNC ORCHESTRATION
-    // -------------------------------------------------------------------------
-    function loadLocalState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_DATA);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          appState = {
-            app: 'MyBans',
-            version: 2,
-            lastUpdated: parsed.lastUpdated || null,
-            lastSyncedAt: parsed.lastSyncedAt || null,
-            bans: Array.isArray(parsed.bans) ? parsed.bans : [],
-            savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
-          };
-        }
-      } catch (e) {
-        console.error('Failed to load local state:', e);
-      }
-    }
-
-    function saveLocalState() {
-      try {
-        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(appState));
-      } catch (e) {
-        console.error('Failed to save local state:', e);
-      }
-    }
-
-    function buildNormalizedExportObject() {
-      const nowMs = Date.now();
-      const normalizedBans = (appState.bans || []).map(ban => {
-        const m = computeBanMetrics(ban, nowMs);
-        return {
-          ...ban,
-          currentStreakDays: m.days,
-          bestStreakDays: m.bestStreakDays
-        };
-      });
-
-      return {
-        app: 'MyBans',
-        version: 2,
-        lastUpdated: appState.lastUpdated || new Date().toISOString(),
-        bans: normalizedBans,
-        savedBans: Array.isArray(appState.savedBans) ? appState.savedBans : []
-      };
-    }
-
-    async function persistAndSync(commitMessage = 'Update mybans.json') {
-      appState.lastUpdated = new Date().toISOString();
-      hasUnsyncedLocalChanges = true;
-      saveLocalState();
-      updateSyncStatusUI();
-
-      if (isGithubConfigured()) {
-        await pushToGithub(false, commitMessage);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 5. LIVE 1-SECOND TICKER & AUTO-SYNC LISTENERS
-    // -------------------------------------------------------------------------
-    function startLiveTicker() {
-      if (liveTickerInterval) clearInterval(liveTickerInterval);
-
-      liveTickerInterval = setInterval(() => {
-        const nowMs = Date.now();
-        let anyCompleted = false;
-
-        (appState.bans || []).forEach(ban => {
-          const m = computeBanMetrics(ban, nowMs);
-          if (m.isCompleted) {
-            anyCompleted = true;
-          }
-
-          const timerEl = document.querySelector(`[data-ban-timer="${ban.id}"]`);
-          if (timerEl) {
-            timerEl.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-          }
-
-          const remEl = document.querySelector(`[data-ban-remaining="${ban.id}"]`);
-          if (remEl) {
-            remEl.textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-          }
-
-          const progEl = document.querySelector(`[data-ban-progress="${ban.id}"]`);
-          if (progEl) {
-            progEl.style.width = `${m.progressPct.toFixed(2)}%`;
-          }
-        });
-
-        // Also update open Detail Modal live timer if visible
-        const detailModal = document.getElementById('modalBanDetail');
-        if (detailModal && !detailModal.classList.contains('hidden')) {
-          const activeDetailId = document.getElementById('detailBanId')?.value;
-          const activeBan = (appState.bans || []).find(b => b.id === activeDetailId);
-          if (activeBan) {
-            const m = computeBanMetrics(activeBan, nowMs);
-            const dTimer = document.getElementById('detailLiveTimer');
-            const dRem = document.getElementById('detailRemainingText');
-            const dProg = document.getElementById('detailProgressBar');
-            if (dTimer) {
-              dTimer.textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-            }
-            if (dRem) {
-              dRem.textContent = activeBan.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-            }
-            if (dProg) {
-              dProg.style.width = `${m.progressPct.toFixed(2)}%`;
-            }
-          }
-        }
-
-        if (anyCompleted && !isSyncInProgress) {
-          checkFinishedBans(true);
-        }
-      }, 1000);
-    }
-
-    function startAutoSyncListeners() {
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && isGithubConfigured()) {
-          smartSyncGithub(false, false);
-        }
-      });
-
-      window.addEventListener('focus', () => {
-        if (isGithubConfigured()) {
-          smartSyncGithub(false, false);
-        }
-      });
-
-      window.addEventListener('resize', hideHeatmapTooltip);
-      const heatmapScrollEl = document.getElementById('detailHeatmapScroll');
-      if (heatmapScrollEl) {
-        heatmapScrollEl.addEventListener('scroll', hideHeatmapTooltip, { passive: true });
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 6. HOME CARDS RENDERER & 53-WEEK SINGLE-GREEN/GREY GITHUB GRAPH
-    // -------------------------------------------------------------------------
-    function renderAll() {
-      updateSyncStatusUI();
-
-      const grid = document.getElementById('bansGrid');
-      const emptyState = document.getElementById('emptyState');
-      if (!grid || !emptyState) return;
-
-      const bans = Array.isArray(appState.bans) ? appState.bans : [];
-      if (bans.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      const nowMs = Date.now();
-
-      grid.innerHTML = bans.map(ban => {
-        const m = computeBanMetrics(ban, nowMs);
-        const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-        const remStr = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-        const safeId = escapeHtml(ban.id);
-        const safeName = escapeHtml(ban.name);
-
-        return `
-          <button
-            type="button"
-            onclick="openBanDetailModal('${safeId}')"
-            class="w-full text-left rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] p-4 sm:p-5 transition active:scale-[0.99] shadow-xs flex flex-col justify-between gap-3.5"
-          >
-            <div class="flex items-start justify-between gap-3 w-full">
-              <h2 class="text-base sm:text-lg font-semibold leading-snug break-words min-w-0">${safeName}</h2>
-              <span class="shrink-0 text-xs font-medium text-[#656d76] dark:text-[#8b949e]" data-ban-remaining="${safeId}">
-                ${escapeHtml(remStr)}
-              </span>
-            </div>
-
-            <div class="w-full space-y-2">
-              <div class="flex items-baseline justify-between gap-2">
-                <span class="text-[11px] uppercase tracking-wider text-[#656d76] dark:text-[#8b949e]">Passed</span>
-                <span class="text-sm sm:text-base font-mono font-semibold text-[#2ea043] tabular-nums" data-ban-timer="${safeId}">
-                  ${timerStr}
-                </span>
-              </div>
-
-              <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
-                <div
-                  data-ban-progress="${safeId}"
-                  class="h-full bg-[#2ea043] rounded-full transition-all duration-500"
-                  style="width: ${m.progressPct.toFixed(2)}%"
-                ></div>
-              </div>
-            </div>
-          </button>
-        `;
-      }).join('');
-    }
-
-    function renderBanGithubGraph(ban) {
-      const container = document.getElementById('detailHeatmapContainer');
-      const summaryEl = document.getElementById('detailGraphSummary');
-      const scrollWrapper = document.getElementById('detailHeatmapScroll');
-      if (!container) return;
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const banStart = new Date(ban.startDate);
-      banStart.setHours(0, 0, 0, 0);
-
-      // Start on the Sunday 52 weeks prior to this week's Sunday (53 columns total)
-      const currentWeekSunday = new Date(today);
-      currentWeekSunday.setDate(today.getDate() - today.getDay());
-
-      const gridStart = new Date(currentWeekSunday);
-      gridStart.setDate(currentWeekSunday.getDate() - 52 * 7);
-
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const weeks = [];
-      let activeDaysInYear = 0;
-
-      for (let w = 0; w < 53; w++) {
-        const weekDays = [];
-        for (let d = 0; d < 7; d++) {
-          const cellDate = new Date(gridStart);
-          cellDate.setDate(gridStart.getDate() + w * 7 + d);
-
-          const isFuture = cellDate.getTime() > today.getTime();
-          const isActive = !isFuture && cellDate.getTime() >= banStart.getTime();
-          if (isActive) activeDaysInYear++;
-
-          weekDays.push({
-            date: cellDate,
-            isFuture,
-            isActive
-          });
-        }
-        weeks.push(weekDays);
-      }
-
-      if (summaryEl) {
-        summaryEl.textContent = `${activeDaysInYear} day${activeDaysInYear === 1 ? '' : 's'} banned in the last year`;
-      }
-
-      // Build Month Labels Row aligned with each week column
-      let lastMonth = -1;
-      const monthHeaderHtml = weeks.map((week, idx) => {
-        const firstValidDay = week.find(day => !day.isFuture) || week[0];
-        const m = firstValidDay.date.getMonth();
-        let label = '';
-        if (m !== lastMonth && (idx === 0 || firstValidDay.date.getDate() <= 7)) {
-          label = monthNames[m];
-          lastMonth = m;
-        }
-        return `<div class="w-[11px] text-[10px] leading-none text-[#656d76] dark:text-[#8b949e] overflow-visible whitespace-nowrap">${label}</div>`;
-      }).join('');
-
-      // Build 53 Week Columns (Single Green #2ea043 & Single Grey only)
-      const columnsHtml = weeks.map(week => {
-        const cellsHtml = week.map(day => {
-          if (day.isFuture) {
-            return `<div class="gh-cell gh-cell-future"></div>`;
-          }
-          const dateLabel = day.date.toLocaleDateString(undefined, {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-          });
-          const statusLabel = day.isActive ? 'Banned' : 'Inactive';
-          const cellClass = day.isActive ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
-
-          return `<div
-            class="${cellClass} cursor-pointer"
-            data-date="${escapeHtml(dateLabel)}"
-            data-status="${statusLabel}"
-            onmouseenter="showHeatmapTooltip(event, this)"
-            onmouseleave="hideHeatmapTooltip()"
-            onclick="event.stopPropagation(); showHeatmapTooltip(event, this)"
-          ></div>`;
-        }).join('');
-
-        return `<div class="flex flex-col gap-[3px]">${cellsHtml}</div>`;
-      }).join('');
-
-      container.innerHTML = `
-        <div class="inline-flex flex-col gap-1.5 select-none">
-          <div class="flex items-center gap-[3px] pl-7">
-            ${monthHeaderHtml}
-          </div>
-          <div class="flex items-start gap-1.5">
-            <div class="w-5 flex flex-col gap-[3px] text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] pt-[1px]">
-              <span class="h-[11px] opacity-0">Sun</span>
-              <span class="h-[11px]">Mon</span>
-              <span class="h-[11px] opacity-0">Tue</span>
-              <span class="h-[11px]">Wed</span>
-              <span class="h-[11px] opacity-0">Thu</span>
-              <span class="h-[11px]">Fri</span>
-              <span class="h-[11px] opacity-0">Sat</span>
-            </div>
-            <div class="flex items-start gap-[3px]">
-              ${columnsHtml}
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Auto-scroll to most recent weeks on mobile
-      if (scrollWrapper) {
-        requestAnimationFrame(() => {
-          scrollWrapper.scrollLeft = scrollWrapper.scrollWidth;
-        });
-      }
-    }
-
-    function showHeatmapTooltip(event, cellEl) {
-      const tooltip = document.getElementById('heatmapTooltip');
-      const dateEl = document.getElementById('heatmapTooltipDate');
-      const detailEl = document.getElementById('heatmapTooltipDetail');
-      if (!tooltip || !cellEl) return;
-
-      dateEl.textContent = cellEl.dataset.date || '';
-      detailEl.textContent = cellEl.dataset.status || '';
-      tooltip.classList.remove('hidden');
-
-      const rect = cellEl.getBoundingClientRect();
-      const tipRect = tooltip.getBoundingClientRect();
-
-      let left = rect.left + rect.width / 2 - tipRect.width / 2;
-      let top = rect.top - tipRect.height - 8;
-
-      left = Math.max(8, Math.min(window.innerWidth - tipRect.width - 8, left));
-      if (top < 8) {
-        top = rect.bottom + 8;
-      }
-
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-    }
-
-    function hideHeatmapTooltip() {
-      const tooltip = document.getElementById('heatmapTooltip');
-      if (tooltip) tooltip.classList.add('hidden');
-    }
-
-    // -------------------------------------------------------------------------
-    // 7. BAN ACTIONS: START, UPDATE, CANCEL, AUTO-FINISH
-    // -------------------------------------------------------------------------
-    function openStartBanModal() {
-      document.getElementById('formStartBan').reset();
-      selectStartPreset(30, 0, false);
-      document.getElementById('modalStartBan').classList.remove('hidden');
-      setTimeout(() => document.getElementById('inputBanName')?.focus(), 80);
-    }
-
-    function closeStartBanModal() {
-      document.getElementById('modalStartBan').classList.add('hidden');
-    }
-
-    function selectStartPreset(days, hours, isForever) {
-      document.getElementById('inputStartForever').value = isForever ? 'true' : 'false';
-      const customWrap = document.getElementById('startCustomDurationWrap');
-      const daysInput = document.getElementById('inputStartDays');
-      const hoursInput = document.getElementById('inputStartHours');
-
-      if (isForever) {
-        customWrap.classList.add('hidden');
-      } else {
-        customWrap.classList.remove('hidden');
-        daysInput.value = days;
-        hoursInput.value = hours;
-      }
-
-      const targetKey = isForever ? 'forever' : `${days}d${hours}h`;
-      document.querySelectorAll('.start-preset-btn').forEach(btn => {
-        const active = btn.dataset.startPreset === targetKey;
-        btn.className = active
-          ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
-          : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
-      });
-    }
-
-    function onStartDurationManualInput() {
-      document.getElementById('inputStartForever').value = 'false';
-      const d = Math.max(0, parseInt(document.getElementById('inputStartDays').value, 10) || 0);
-      const h = Math.max(0, parseInt(document.getElementById('inputStartHours').value, 10) || 0);
-      const currentKey = `${d}d${h}h`;
-      document.querySelectorAll('.start-preset-btn').forEach(btn => {
-        const active = btn.dataset.startPreset === currentKey;
-        btn.className = active
-          ? 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
-          : 'start-preset-btn py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
-      });
-    }
-
-    async function handleStartBanSubmit(event) {
-      event.preventDefault();
-      const name = document.getElementById('inputBanName').value.trim();
-      if (!name) return;
-
-      const isForever = document.getElementById('inputStartForever').value === 'true';
-      let durationDays = null;
-      let durationHours = null;
-      let totalHours = null;
-
-      if (!isForever) {
-        const rawDays = Math.max(0, parseInt(document.getElementById('inputStartDays').value, 10) || 0);
-        const rawHours = Math.max(0, parseInt(document.getElementById('inputStartHours').value, 10) || 0);
-        totalHours = rawDays * 24 + rawHours;
-        if (totalHours < 1) {
-          showToast('Please enter at least 1 hour or select Forever ∞');
-          document.getElementById('inputStartHours')?.focus();
-          return;
-        }
-        durationDays = Math.floor(totalHours / 24);
-        durationHours = totalHours % 24;
-      }
-
-      const reason = document.getElementById('inputBanReason').value.trim();
-      const now = new Date();
-      const targetEndDate = isForever
-        ? null
-        : new Date(now.getTime() + totalHours * 3600000).toISOString();
-
-      const newBan = {
-        id: `ban_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        name,
-        reason,
-        startDate: now.toISOString(),
-        targetEndDate,
-        durationDays,
-        durationHours,
-        isForever,
-        currentStreakDays: 0,
-        bestStreakDays: 0
-      };
-
-      appState.bans.unshift(newBan);
-      closeStartBanModal();
-      renderAll();
-      await persistAndSync(`Start ban: ${name}`);
-      showToast(`Started ban: "${name}"`);
-    }
-
-    function openBanDetailModal(banId) {
-      const ban = appState.bans.find(b => b.id === banId);
-      if (!ban) return;
-
-      hideCancelConfirm();
-      hideHeatmapTooltip();
-
-      const m = computeBanMetrics(ban, Date.now());
-      document.getElementById('detailBanId').value = ban.id;
-      document.getElementById('detailBanName').textContent = ban.name;
-      document.getElementById('detailLiveTimer').textContent = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
-      document.getElementById('detailRemainingText').textContent = ban.isForever ? 'Forever ∞' : `${formatDurationCompact(m.remainingMs)} left`;
-      document.getElementById('detailStartDate').textContent = formatShortDate(ban.startDate);
-      document.getElementById('detailEndDate').textContent = ban.isForever ? 'Forever ∞' : formatShortDate(ban.targetEndDate);
-      document.getElementById('detailProgressBar').style.width = `${m.progressPct.toFixed(2)}%`;
-
-      const reasonBox = document.getElementById('detailReasonBox');
-      const reasonText = document.getElementById('detailReasonText');
-      if (ban.reason && ban.reason.trim()) {
-        reasonBox.classList.remove('hidden');
-        reasonText.textContent = ban.reason;
-      } else {
-        reasonBox.classList.add('hidden');
-      }
-
-      document.getElementById('modalBanDetail').classList.remove('hidden');
-      renderBanGithubGraph(ban);
-    }
-
-    function closeBanDetailModal() {
-      hideHeatmapTooltip();
-      hideCancelConfirm();
-      document.getElementById('modalBanDetail').classList.add('hidden');
-    }
-
-    function openUpdateBanModal() {
-      const banId = document.getElementById('detailBanId').value;
-      const ban = appState.bans.find(b => b.id === banId);
-      if (!ban) return;
-
-      document.getElementById('updateBanId').value = ban.id;
-      document.getElementById('updateBanName').value = ban.name;
-      document.getElementById('updateBanReason').value = ban.reason || '';
-
-      const isForever = Boolean(ban.isForever);
-      document.getElementById('updateIsForever').value = isForever ? 'true' : 'false';
-
-      let totalHours = 0;
-      if (ban.targetEndDate && ban.startDate) {
-        const diffMs = Math.max(0, new Date(ban.targetEndDate).getTime() - new Date(ban.startDate).getTime());
-        totalHours = Math.round(diffMs / 3600000);
-      } else if (typeof ban.durationDays === 'number' || typeof ban.durationHours === 'number') {
-        totalHours = (ban.durationDays || 0) * 24 + (ban.durationHours || 0);
-      }
-      if (totalHours < 1) {
-        totalHours = Math.max(1, (computeBanMetrics(ban).days + 1) * 24);
-      }
-
-      document.getElementById('updateDurationDays').value = Math.floor(totalHours / 24);
-      document.getElementById('updateDurationHours').value = totalHours % 24;
-
-      syncUpdateForeverUI(isForever);
-      document.getElementById('modalUpdateBan').classList.remove('hidden');
-    }
-
-    function closeUpdateBanModal() {
-      document.getElementById('modalUpdateBan').classList.add('hidden');
-    }
-
-    function syncUpdateForeverUI(isForever) {
-      const wrap = document.getElementById('updateCustomDurationWrap');
-      const btn = document.getElementById('btnUpdateForever');
-      if (isForever) {
-        wrap.classList.add('hidden');
-        btn.className = 'py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition';
-      } else {
-        wrap.classList.remove('hidden');
-        btn.className = 'py-2.5 min-h-[42px] rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] transition';
-      }
-    }
-
-    function extendUpdateHours(addHours) {
-      document.getElementById('updateIsForever').value = 'false';
-      syncUpdateForeverUI(false);
-      const daysInput = document.getElementById('updateDurationDays');
-      const hoursInput = document.getElementById('updateDurationHours');
-      const curDays = Math.max(0, parseInt(daysInput.value, 10) || 0);
-      const curHours = Math.max(0, parseInt(hoursInput.value, 10) || 0);
-      const nextTotalHours = curDays * 24 + curHours + addHours;
-      daysInput.value = Math.floor(nextTotalHours / 24);
-      hoursInput.value = nextTotalHours % 24;
-    }
-
-    function toggleUpdateForever() {
-      const current = document.getElementById('updateIsForever').value === 'true';
-      const next = !current;
-      document.getElementById('updateIsForever').value = next ? 'true' : 'false';
-      syncUpdateForeverUI(next);
-    }
-
-    async function handleUpdateBanSubmit(event) {
-      event.preventDefault();
-      const banId = document.getElementById('updateBanId').value;
-      const banIndex = appState.bans.findIndex(b => b.id === banId);
-      if (banIndex === -1) return;
-
-      const ban = appState.bans[banIndex];
-      const newName = document.getElementById('updateBanName').value.trim();
-      if (!newName) return;
-
-      const isForever = document.getElementById('updateIsForever').value === 'true';
-      let durationDays = null;
-      let durationHours = null;
-      let totalHours = null;
-
-      if (!isForever) {
-        const rawDays = Math.max(0, parseInt(document.getElementById('updateDurationDays').value, 10) || 0);
-        const rawHours = Math.max(0, parseInt(document.getElementById('updateDurationHours').value, 10) || 0);
-        totalHours = rawDays * 24 + rawHours;
-        if (totalHours < 1) {
-          showToast('Please enter at least 1 hour or select Forever ∞');
-          document.getElementById('updateDurationHours')?.focus();
-          return;
-        }
-        durationDays = Math.floor(totalHours / 24);
-        durationHours = totalHours % 24;
-      }
-
-      const newReason = document.getElementById('updateBanReason').value.trim();
-
-      // Keep original startDate and active streak intact; only recalculate targetEndDate
-      const startMs = new Date(ban.startDate).getTime();
-      const targetEndDate = isForever
-        ? null
-        : new Date(startMs + totalHours * 3600000).toISOString();
-
-      appState.bans[banIndex] = {
-        ...ban,
-        name: newName,
-        reason: newReason,
-        durationDays,
-        durationHours,
-        isForever,
-        targetEndDate
-      };
-
-      closeUpdateBanModal();
-      renderAll();
-      openBanDetailModal(banId);
-      await persistAndSync(`Update ban: ${newName}`);
-      await checkFinishedBans(true);
-      showToast(`Updated "${newName}"`);
-    }
-
-    function showCancelConfirm() {
-      document.getElementById('cancelConfirmBox').classList.remove('hidden');
-    }
-
-    function hideCancelConfirm() {
-      const box = document.getElementById('cancelConfirmBox');
-      if (box) box.classList.add('hidden');
-    }
-
-    async function confirmCancelActiveBan() {
-      const banId = document.getElementById('detailBanId').value;
-      const idx = appState.bans.findIndex(b => b.id === banId);
-      if (idx === -1) return;
-
-      const ban = appState.bans[idx];
-      const nowIso = new Date().toISOString();
-      const m = computeBanMetrics(ban, Date.now());
-
-      const archivedEntry = {
-        ...ban,
-        endedAt: nowIso,
-        finalStreakDays: m.days,
-        bestStreakDays: m.bestStreakDays,
-        status: 'cancelled'
-      };
-
-      appState.savedBans = [archivedEntry, ...(appState.savedBans || [])];
-      appState.bans.splice(idx, 1);
-
-      closeBanDetailModal();
-      renderAll();
-      await persistAndSync(`Cancel ban: ${ban.name}`);
-      showToast(`Cancelled & saved "${ban.name}"`);
-    }
-
-    async function checkFinishedBans(shouldSync = true) {
-      if (!appState.bans || appState.bans.length === 0) return;
-
-      const nowMs = Date.now();
-      const nowIso = new Date(nowMs).toISOString();
-      const stillActive = [];
-      const newlyFinished = [];
-
-      appState.bans.forEach(ban => {
-        const m = computeBanMetrics(ban, nowMs);
-        if (m.isCompleted) {
-          const achievedDays = Math.max(m.days, ban.durationDays || 0);
-          newlyFinished.push({
-            ...ban,
-            endedAt: ban.targetEndDate || nowIso,
-            finalStreakDays: achievedDays,
-            bestStreakDays: Math.max(m.bestStreakDays, achievedDays),
-            status: 'completed'
-          });
-        } else {
-          stillActive.push(ban);
-        }
-      });
-
-      if (newlyFinished.length > 0) {
-        appState.bans = stillActive;
-        appState.savedBans = [...newlyFinished, ...(appState.savedBans || [])];
-
-        const detailId = document.getElementById('detailBanId')?.value;
-        if (newlyFinished.some(b => b.id === detailId)) {
-          closeBanDetailModal();
-        }
-
-        renderAll();
-        if (shouldSync) {
-          await persistAndSync(`Completed ${newlyFinished.length} ban(s)`);
-        } else {
-          saveLocalState();
-        }
-        showToast(`Completed & saved: "${newlyFinished[0].name}"`);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // 8. GITHUB JSON BACKEND (SMART PULL + PUSH + AUTO BRANCH DETECTION)
-    // -------------------------------------------------------------------------
+// ... existing code ... -->
     function loadGithubConfig() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_GH);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          githubConfig = { ...githubConfig, ...parsed };
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          githubConfig = {
+            owner: (parsed.owner || 'ahmedbentabet').trim() || 'ahmedbentabet',
+            repo: (parsed.repo || 'mybans-data').trim() || 'mybans-data',
+            path: (parsed.path || 'mybans.json').trim() || 'mybans.json',
+            branch: (parsed.branch || 'master').trim() || 'master',
+            token: (parsed.token || '').trim(),
+            sha: parsed.sha || null
+          };
         }
       } catch (e) {
-        console.error('Failed to load GitHub config:', e);
+        // Ignore parse errors
       }
+      updateSyncStatusUI();
     }
 
     function saveGithubConfig() {
       try {
         localStorage.setItem(STORAGE_KEY_GH, JSON.stringify(githubConfig));
       } catch (e) {
-        console.error('Failed to save GitHub config:', e);
+        // Ignore storage errors
       }
+      updateSyncStatusUI();
     }
 
     function isGithubConfigured() {
       return Boolean(githubConfig.owner && githubConfig.repo && githubConfig.path && githubConfig.token);
-    }
-
-    function openGithubModal() {
-      document.getElementById('ghOwner').value = githubConfig.owner || '';
-      document.getElementById('ghRepo').value = githubConfig.repo || '';
-      document.getElementById('ghPath').value = githubConfig.path || 'mybans.json';
-      document.getElementById('ghBranch').value = githubConfig.branch || 'master';
-      document.getElementById('ghToken').value = githubConfig.token || '';
-      setGhFeedback('', 'hidden');
-      document.getElementById('modalGithub').classList.remove('hidden');
-    }
-
-    function closeGithubModal() {
-      document.getElementById('modalGithub').classList.add('hidden');
-    }
-
-    async function handleSaveAndSyncGithub(event) {
-      event.preventDefault();
-      const owner = document.getElementById('ghOwner').value.trim();
-      const repo = document.getElementById('ghRepo').value.trim();
-      const path = (document.getElementById('ghPath').value.trim() || 'mybans.json').replace(/^\/+/, '');
-      const branch = document.getElementById('ghBranch').value.trim() || 'master';
-      const token = document.getElementById('ghToken').value.trim();
-
-      if (!owner || !repo || !token) {
-        setGhFeedback('Please enter your GitHub username, repository name, and token.', 'error');
-        return;
-      }
-
-      const isNewConnection = githubConfig.owner !== owner || githubConfig.repo !== repo || githubConfig.path !== path;
-      githubConfig = {
-        owner,
-        repo,
-        path,
-        branch,
-        token,
-        sha: isNewConnection ? null : githubConfig.sha
-      };
-      saveGithubConfig();
-      updateSyncStatusUI();
-
-      await smartSyncGithub(true, true);
-    }
-
-    function disconnectGithub() {
-      githubConfig = {
-        owner: '',
-        repo: '',
-        path: 'mybans.json',
-        branch: 'master',
-        token: '',
-        sha: null
-      };
-      try {
-        localStorage.removeItem(STORAGE_KEY_GH);
-      } catch (e) {
-        // Ignore
-      }
-      updateSyncStatusUI();
-      setGhFeedback('Disconnected from GitHub. Using local browser storage.', 'info');
     }
 
     function utf8ToBase64(str) {
@@ -1710,8 +954,8 @@
     }
 
     function base64ToUtf8(b64) {
-      const clean = b64.replace(/\s/g, '');
-      const binary = atob(clean);
+      const cleanB64 = (b64 || '').replace(/\s+/g, '');
+      const binary = atob(cleanB64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) {
         bytes[i] = binary.charCodeAt(i);
@@ -1719,297 +963,563 @@
       return new TextDecoder().decode(bytes);
     }
 
-    async function fetchRemoteFileFromBranch(branchName) {
-      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${githubConfig.path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branchName)}&_t=${Date.now()}`;
-      return fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${githubConfig.token}`,
-          'Accept': 'application/vnd.github+json'
-        }
-      });
+    function updateSyncStatusUI(stateOverride = null) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncLabel');
+      if (!dot || !label) return;
+
+      if (!isGithubConfigured()) {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
+        label.textContent = 'Local JSON';
+        return;
+      }
+
+      if (stateOverride === 'syncing') {
+        dot.className = 'w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0';
+        label.textContent = 'Syncing...';
+        return;
+      }
+
+      if (stateOverride === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500 shrink-0';
+        label.textContent = 'Sync Error';
+        return;
+      }
+
+      dot.className = 'w-2 h-2 rounded-full bg-[#2ea043] shrink-0';
+      label.textContent = `${githubConfig.repo}`;
     }
 
-    async function smartSyncGithub(showModalFeedback = false, closeOnSuccess = false) {
+    function setGhFeedback(msg, type = 'info') {
+      const box = document.getElementById('ghFeedback');
+      if (!box) return;
+      if (!msg) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed border ';
+      if (type === 'error') {
+        box.className += 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400';
+      } else if (type === 'success') {
+        box.className += 'border-[#2ea043]/40 bg-[#2ea043]/10 text-[#2ea043]';
+      } else {
+        box.className += 'border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e]';
+      }
+      box.textContent = msg;
+      box.classList.remove('hidden');
+    }
+
+    async function fetchRemoteGithubFile(branchName) {
+      const cleanPath = githubConfig.path.replace(/^\/+/, '');
+      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${cleanPath}?ref=${encodeURIComponent(branchName)}&_t=${Date.now()}`;
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${githubConfig.token}`,
+          Accept: 'application/vnd.github+json'
+        }
+      });
+
+      if (res.status === 404) {
+        return { exists: false, sha: null, data: null };
+      }
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || `GitHub API error (${res.status})`);
+      }
+
+      const fileMeta = await res.json();
+      const decodedText = base64ToUtf8(fileMeta.content || '');
+      const parsedData = normalizeLoadedState(JSON.parse(decodedText || '{}'));
+      return {
+        exists: true,
+        sha: fileMeta.sha || null,
+        data: parsedData
+      };
+    }
+
+    async function pushRemoteGithubFile(shaToUse) {
+      const cleanPath = githubConfig.path.replace(/^\/+/, '');
+      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${cleanPath}`;
+      const jsonString = JSON.stringify(buildSerializableJsonPayload(), null, 2);
+
+      const body = {
+        message: `Update ${cleanPath} via MyBans`,
+        content: utf8ToBase64(jsonString),
+        branch: githubConfig.branch
+      };
+      if (shaToUse) {
+        body.sha = shaToUse;
+      }
+
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${githubConfig.token}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.message || `GitHub push failed (${res.status})`);
+      }
+
+      const result = await res.json();
+      if (result && result.content && result.content.sha) {
+        githubConfig.sha = result.content.sha;
+        saveGithubConfig();
+      }
+    }
+
+    async function smartSyncGithub(showModalFeedback = false, forcePushLocal = false) {
       if (!isGithubConfigured() || isSyncInProgress) return;
       isSyncInProgress = true;
-      setSyncState('syncing', 'Syncing...');
-      if (showModalFeedback) setGhFeedback('Syncing with GitHub...', 'info');
+      updateSyncStatusUI('syncing');
 
       try {
-        let res = await fetchRemoteFileFromBranch(githubConfig.branch);
+        let remote = await fetchRemoteGithubFile(githubConfig.branch);
 
-        // Auto-detect master vs main if file wasn't found on the typed branch
-        if (res.status === 404 && (githubConfig.branch === 'main' || githubConfig.branch === 'master')) {
-          const fallbackBranch = githubConfig.branch === 'main' ? 'master' : 'main';
-          const fallbackRes = await fetchRemoteFileFromBranch(fallbackBranch);
-          if (fallbackRes.ok) {
-            githubConfig.branch = fallbackBranch;
-            const branchInput = document.getElementById('ghBranch');
-            if (branchInput) branchInput.value = fallbackBranch;
-            saveGithubConfig();
-            res = fallbackRes;
+        // Auto-detect master vs main if file wasn't found on the configured branch
+        if (!remote.exists) {
+          const altBranch = githubConfig.branch === 'master' ? 'main' : githubConfig.branch === 'main' ? 'master' : null;
+          if (altBranch) {
+            const altRemote = await fetchRemoteGithubFile(altBranch);
+            if (altRemote.exists) {
+              githubConfig.branch = altBranch;
+              remote = altRemote;
+              saveGithubConfig();
+            }
           }
         }
 
-        if (res.status === 404) {
-          // File doesn't exist in repo yet -> create it from current local state
-          await pushToGithub(showModalFeedback, 'Initialize mybans.json');
-          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 550);
-          return;
-        }
+        const localHasData = appState.bans.length > 0 || appState.savedBans.length > 0;
 
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || `GitHub API error (${res.status})`);
-        }
+        if (remote.exists) {
+          githubConfig.sha = remote.sha;
+          saveGithubConfig();
 
-        const fileJson = await res.json();
-        githubConfig.sha = fileJson.sha || null;
-        saveGithubConfig();
+          const remoteTime = remote.data.lastUpdated ? new Date(remote.data.lastUpdated).getTime() : 0;
+          const localTime = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
 
-        const decodedText = base64ToUtf8(fileJson.content || '');
-        const remoteData = JSON.parse(decodedText);
-
-        const remoteBans = Array.isArray(remoteData.bans) ? remoteData.bans : [];
-        const remoteSaved = Array.isArray(remoteData.savedBans) ? remoteData.savedBans : [];
-        const localBans = Array.isArray(appState.bans) ? appState.bans : [];
-        const localSaved = Array.isArray(appState.savedBans) ? appState.savedBans : [];
-
-        const remoteUpdatedMs = remoteData.lastUpdated ? new Date(remoteData.lastUpdated).getTime() : 0;
-        const localUpdatedMs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
-
-        const localIsEmpty = localBans.length === 0 && localSaved.length === 0;
-
-        if (localIsEmpty || (!hasUnsyncedLocalChanges && remoteUpdatedMs >= localUpdatedMs)) {
-          // Adopt remote data cleanly (prevents fresh device from overwriting existing school/PC bans)
-          appState = {
-            app: 'MyBans',
-            version: 2,
-            lastUpdated: remoteData.lastUpdated || new Date().toISOString(),
-            lastSyncedAt: new Date().toISOString(),
-            bans: remoteBans,
-            savedBans: remoteSaved
-          };
-          hasUnsyncedLocalChanges = false;
-          saveLocalState();
-          renderAll();
-
-          setSyncState('synced', 'Synced');
-          if (showModalFeedback) {
-            setGhFeedback(`Synced! Loaded ${remoteBans.length} active ban(s) from ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+          if (!forcePushLocal && !hasUnsyncedLocalChanges && (!localHasData || remoteTime >= localTime)) {
+            appState = {
+              ...remote.data,
+              lastSyncedAt: new Date().toISOString()
+            };
+            saveLocalState();
+            renderAll();
+            updateSyncStatusUI('ok');
+            if (showModalFeedback) {
+              setGhFeedback(`Synced! Loaded ${appState.bans.length} active ban(s) from ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+            }
+          } else {
+            await pushRemoteGithubFile(remote.sha);
+            hasUnsyncedLocalChanges = false;
+            appState.lastSyncedAt = new Date().toISOString();
+            saveLocalState();
+            updateSyncStatusUI('ok');
+            if (showModalFeedback) {
+              setGhFeedback(`Saved & synced to ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+            }
           }
-          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 650);
         } else {
-          // Local has newer unsynced edits -> push up with latest SHA
-          await pushToGithub(showModalFeedback, 'Sync MyBans updates');
-          if (closeOnSuccess) setTimeout(() => closeGithubModal(), 650);
+          // Remote JSON file does not exist yet — create it
+          await pushRemoteGithubFile(null);
+          hasUnsyncedLocalChanges = false;
+          appState.lastSyncedAt = new Date().toISOString();
+          saveLocalState();
+          updateSyncStatusUI('ok');
+          if (showModalFeedback) {
+            setGhFeedback(`Created ${githubConfig.path} in ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+          }
         }
       } catch (err) {
-        console.error('GitHub smart sync error:', err);
-        setSyncState('error', 'Sync Error');
+        updateSyncStatusUI('error');
         if (showModalFeedback) {
-          setGhFeedback(`Sync failed: ${err.message}`, 'error');
+          setGhFeedback(err.message || 'Unable to sync with GitHub.', 'error');
         }
       } finally {
         isSyncInProgress = false;
       }
     }
 
-    async function pushToGithub(showModalFeedback = false, commitMessage = 'Update mybans.json') {
-      if (!isGithubConfigured()) return;
-      setSyncState('syncing', 'Syncing...');
-
-      try {
-        // Ensure we have the latest file SHA before PUT
-        if (!githubConfig.sha) {
-          const checkRes = await fetchRemoteFileFromBranch(githubConfig.branch);
-          if (checkRes.ok) {
-            const checkData = await checkRes.json();
-            githubConfig.sha = checkData.sha || null;
-          }
+    function startAutoSyncListeners() {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && isGithubConfigured()) {
+          smartSyncGithub(false, false);
         }
+      });
+    }
 
-        appState.lastSyncedAt = new Date().toISOString();
-        const exportObj = buildNormalizedExportObject();
-        const contentBase64 = utf8ToBase64(JSON.stringify(exportObj, null, 2));
+    // -------------------------------------------------------------------------
+    // 6. LIVE 1-SECOND TICKER & AUTOMATIC BAN COMPLETION ARCHIVER
+    // -------------------------------------------------------------------------
+    function startLiveTicker() {
+      if (liveTickerInterval) clearInterval(liveTickerInterval);
+      liveTickerInterval = setInterval(() => {
+        updateLiveTimersInPlace();
+        checkFinishedBans(false);
+      }, 1000);
+    }
 
-        const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${githubConfig.path.split('/').map(encodeURIComponent).join('/')}`;
-        const body = {
-          message: commitMessage,
-          content: contentBase64,
-          branch: githubConfig.branch
-        };
-        if (githubConfig.sha) {
-          body.sha = githubConfig.sha;
-        }
+    function updateLiveTimersInPlace() {
+      const nowMs = Date.now();
+      const openDetailId = document.getElementById('detailBanId')?.value || '';
+      const isDetailOpen = !document.getElementById('modalBanDetail')?.classList.contains('hidden');
 
-        let putRes = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${githubConfig.token}`,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
+      for (const ban of appState.bans) {
+        const metrics = computeBanMetrics(ban, nowMs);
+        const timerStr = `${metrics.days}d ${String(metrics.hours).padStart(2, '0')}h ${String(metrics.minutes).padStart(2, '0')}m ${String(metrics.seconds).padStart(2, '0')}s`;
+        const remStr = ban.isForever
+          ? 'Forever ∞'
+          : metrics.isCompleted
+          ? 'Done'
+          : `${formatDurationCompact(metrics.remainingMs)} left`;
 
-        // Handle SHA conflict by fetching fresh SHA once and retrying
-        if (putRes.status === 409 || putRes.status === 422) {
-          const freshRes = await fetchRemoteFileFromBranch(githubConfig.branch);
-          if (freshRes.ok) {
-            const freshJson = await freshRes.json();
-            githubConfig.sha = freshJson.sha;
-            body.sha = githubConfig.sha;
-            putRes = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `Bearer ${githubConfig.token}`,
-                'Accept': 'application/vnd.github+json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(body)
-            });
-          }
-        }
+        const cardTimerEl = document.getElementById(`card-timer-${ban.id}`);
+        if (cardTimerEl) cardTimerEl.textContent = timerStr;
 
-        if (!putRes.ok) {
-          const errData = await putRes.json().catch(() => ({}));
-          throw new Error(errData.message || `GitHub write error (${putRes.status})`);
-        }
+        const cardRemEl = document.getElementById(`card-rem-${ban.id}`);
+        if (cardRemEl) cardRemEl.textContent = remStr;
 
-        const resultData = await putRes.json();
-        githubConfig.sha = resultData?.content?.sha || githubConfig.sha;
-        saveGithubConfig();
+        const cardBarEl = document.getElementById(`card-bar-${ban.id}`);
+        if (cardBarEl) cardBarEl.style.width = `${metrics.progressPct.toFixed(2)}%`;
 
-        hasUnsyncedLocalChanges = false;
-        saveLocalState();
-        setSyncState('synced', 'Synced');
-        if (showModalFeedback) {
-          setGhFeedback(`Saved & synced to ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
-        }
-      } catch (err) {
-        console.error('GitHub push error:', err);
-        setSyncState('error', 'Sync Error');
-        if (showModalFeedback) {
-          setGhFeedback(`Push failed: ${err.message}`, 'error');
+        if (isDetailOpen && openDetailId === ban.id) {
+          const detailTimerEl = document.getElementById('detailLiveTimer');
+          if (detailTimerEl) detailTimerEl.textContent = timerStr;
+
+          const detailRemEl = document.getElementById('detailRemainingText');
+          if (detailRemEl) detailRemEl.textContent = remStr;
+
+          const detailBarEl = document.getElementById('detailProgressBar');
+          if (detailBarEl) detailBarEl.style.width = `${metrics.progressPct.toFixed(2)}%`;
         }
       }
     }
 
-    function updateSyncStatusUI() {
-      if (!isGithubConfigured()) {
-        setSyncState('local', 'Local JSON');
-      } else if (hasUnsyncedLocalChanges) {
-        setSyncState('pending', 'Unsynced');
-      } else {
-        setSyncState('synced', 'Synced');
+    async function checkFinishedBans(silent = false) {
+      const nowMs = Date.now();
+      const stillActive = [];
+      const newlyFinished = [];
+
+      for (const ban of appState.bans) {
+        const metrics = computeBanMetrics(ban, nowMs);
+        if (!ban.isForever && metrics.isCompleted) {
+          newlyFinished.push({
+            ...ban,
+            status: 'completed',
+            endedAt: ban.targetEndDate || new Date(nowMs).toISOString(),
+            finalStreakDays: metrics.days,
+            bestStreakDays: metrics.bestStreakDays
+          });
+        } else {
+          stillActive.push(ban);
+        }
+      }
+
+      if (newlyFinished.length > 0) {
+        appState.bans = stillActive;
+        appState.savedBans = [...newlyFinished, ...appState.savedBans];
+
+        const openDetailId = document.getElementById('detailBanId')?.value;
+        if (newlyFinished.some((b) => b.id === openDetailId)) {
+          closeBanDetailModal();
+        }
+
+        const msg =
+          newlyFinished.length === 1
+            ? `Achievement unlocked! Completed: "${newlyFinished[0].name}"`
+            : `Achievement unlocked! Completed ${newlyFinished.length} bans.`;
+
+        await persistAndSync(silent ? null : msg);
       }
     }
 
-    function setSyncState(state, label) {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncLabel');
-      if (text) text.textContent = label;
-      if (!dot) return;
-
-      dot.className = 'w-2 h-2 rounded-full shrink-0 ';
-      if (state === 'synced') {
-        dot.className += 'bg-[#2ea043]';
-      } else if (state === 'syncing') {
-        dot.className += 'bg-sky-400 animate-pulse';
-      } else if (state === 'error') {
-        dot.className += 'bg-rose-500';
-      } else {
-        dot.className += 'bg-amber-400';
+    // -------------------------------------------------------------------------
+    // 7. HOME CARDS & 53-WEEK GITHUB ACTIVITY GRAPH RENDERING
+    // -------------------------------------------------------------------------
+    function renderAll() {
+      renderBansList();
+      updateAchievementsBadge();
+      updateSyncStatusUI();
+      if (!document.getElementById('modalAchievements')?.classList.contains('hidden')) {
+        renderAchievementsList();
       }
     }
 
-    function setGhFeedback(message, type) {
-      const box = document.getElementById('ghFeedback');
-      if (!box) return;
-      if (type === 'hidden' || !message) {
-        box.classList.add('hidden');
+    function updateAchievementsBadge() {
+      const badge = document.getElementById('achievementsCountBadge');
+      if (!badge) return;
+      const completedCount = (appState.savedBans || []).filter((b) => b.status === 'completed').length;
+      badge.textContent = String(completedCount);
+    }
+
+    function renderBansList() {
+      const grid = document.getElementById('bansGrid');
+      const emptyState = document.getElementById('emptyState');
+      if (!grid || !emptyState) return;
+
+      if (!appState.bans || appState.bans.length === 0) {
+        grid.innerHTML = '';
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
         return;
       }
 
-      box.classList.remove('hidden');
-      box.textContent = message;
+      emptyState.classList.add('hidden');
+      grid.classList.remove('hidden');
 
-      if (type === 'error') {
-        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30';
-      } else if (type === 'success') {
-        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-[#2ea043]/15 text-[#2ea043] border border-[#2ea043]/30';
-      } else {
-        box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e] border border-[#d0d7de] dark:border-[#30363d]';
-      }
+      const nowMs = Date.now();
+      grid.innerHTML = appState.bans
+        .map((ban) => {
+          const metrics = computeBanMetrics(ban, nowMs);
+          const timerStr = `${metrics.days}d ${String(metrics.hours).padStart(2, '0')}h ${String(metrics.minutes).padStart(2, '0')}m ${String(metrics.seconds).padStart(2, '0')}s`;
+          const totalDurStr = formatTotalDuration(ban);
+          const remStr = ban.isForever
+            ? 'Forever ∞'
+            : metrics.isCompleted
+            ? 'Done'
+            : `${formatDurationCompact(metrics.remainingMs)} left`;
+
+          return `
+            <button
+              type="button"
+              onclick="openBanDetailModal('${escapeHtml(ban.id)}')"
+              class="w-full text-left rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] p-4 sm:p-5 transition active:scale-[0.99] shadow-sm flex flex-col justify-between gap-3.5"
+            >
+              <div class="flex items-start justify-between gap-3 w-full">
+                <div class="min-w-0">
+                  <h2 class="text-base sm:text-lg font-semibold leading-snug break-words">
+                    ${escapeHtml(ban.name)}
+                  </h2>
+                  <div class="text-xs text-[#656d76] dark:text-[#8b949e] mt-0.5">
+                    Total: <span class="font-medium text-[#1f2328] dark:text-[#e6edf3]">${escapeHtml(totalDurStr)}</span>
+                  </div>
+                </div>
+                <span id="card-rem-${escapeHtml(ban.id)}" class="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e] border border-[#d0d7de]/70 dark:border-[#30363d]">
+                  ${escapeHtml(remStr)}
+                </span>
+              </div>
+
+              <div class="w-full space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-[#656d76] dark:text-[#8b949e]">Passed</span>
+                  <span id="card-timer-${escapeHtml(ban.id)}" class="font-mono font-semibold text-[#2ea043] tabular-nums">
+                    ${timerStr}
+                  </span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
+                  <div id="card-bar-${escapeHtml(ban.id)}" class="h-full bg-[#2ea043] rounded-full transition-all duration-500" style="width: ${metrics.progressPct.toFixed(2)}%"></div>
+                </div>
+              </div>
+            </button>
+          `;
+        })
+        .join('');
     }
 
-    // -------------------------------------------------------------------------
-    // 9. LOCAL JSON EXPORT / IMPORT & HELPERS
-    // -------------------------------------------------------------------------
-    function exportJsonFile() {
-      try {
-        const dataStr = JSON.stringify(buildNormalizedExportObject(), null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mybans.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast('Exported mybans.json');
-      } catch (e) {
-        showToast('Failed to export JSON file');
-      }
-    }
+    function renderBanHeatmap(ban) {
+      const container = document.getElementById('detailHeatmapContainer');
+      const summaryEl = document.getElementById('detailGraphSummary');
+      if (!container) return;
 
-    function importJsonFile(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (!parsed || !Array.isArray(parsed.bans)) {
-            throw new Error('Invalid MyBans JSON format.');
+      const banStart = new Date(ban.startDate);
+      banStart.setHours(0, 0, 0, 0);
+
+      // Build 53 weeks (Sun -> Sat) ending on Saturday of the current week
+      const dayOfWeek = today.getDay();
+      const endOfGrid = new Date(today);
+      endOfGrid.setDate(today.getDate() + (6 - dayOfWeek));
+
+      const totalWeeks = 53;
+      const startOfGrid = new Date(endOfGrid);
+      startOfGrid.setDate(endOfGrid.getDate() - (totalWeeks * 7 - 1));
+
+      // Also include any archived periods for the exact same ban name if present
+      const activeIntervals = [{ start: banStart.getTime(), end: today.getTime() }];
+      if (Array.isArray(appState.savedBans)) {
+        for (const past of appState.savedBans) {
+          if (past.name && ban.name && past.name.trim().toLowerCase() === ban.name.trim().toLowerCase()) {
+            const pStart = new Date(past.startDate);
+            pStart.setHours(0, 0, 0, 0);
+            const pEnd = new Date(past.endedAt || past.targetEndDate || today);
+            pEnd.setHours(0, 0, 0, 0);
+            activeIntervals.push({ start: pStart.getTime(), end: pEnd.getTime() });
           }
-          appState = {
-            app: 'MyBans',
-            version: 2,
-            lastUpdated: new Date().toISOString(),
-            lastSyncedAt: appState.lastSyncedAt || null,
-            bans: parsed.bans,
-            savedBans: Array.isArray(parsed.savedBans) ? parsed.savedBans : []
-          };
-          renderAll();
-          await persistAndSync('Import mybans.json');
-          closeGithubModal();
-          showToast(`Imported ${appState.bans.length} active ban(s)`);
-        } catch (err) {
-          setGhFeedback(`Import failed: ${err.message}`, 'error');
-        } finally {
-          event.target.value = '';
         }
-      };
-      reader.readAsText(file);
+      }
+
+      function isDayBanned(dayMs) {
+        for (const interval of activeIntervals) {
+          if (dayMs >= interval.start && dayMs <= interval.end) return true;
+        }
+        return false;
+      }
+
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let bannedDaysCount = 0;
+      const weeks = [];
+      const monthHeaders = [];
+      let lastMonthShown = -1;
+
+      const cursor = new Date(startOfGrid);
+      for (let w = 0; w < totalWeeks; w++) {
+        const weekDays = [];
+        let monthLabel = '';
+
+        for (let d = 0; d < 7; d++) {
+          const cellDate = new Date(cursor);
+          const cellMs = cellDate.getTime();
+          const isFuture = cellMs > today.getTime();
+          const banned = !isFuture && isDayBanned(cellMs);
+
+          if (banned) bannedDaysCount++;
+
+          if (d === 0) {
+            const m = cellDate.getMonth();
+            if (m !== lastMonthShown) {
+              monthLabel = monthNames[m];
+              lastMonthShown = m;
+            }
+          }
+
+          weekDays.push({
+            dateStr: cellDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+            isFuture,
+            banned
+          });
+
+          cursor.setDate(cursor.getDate() + 1);
+        }
+
+        weeks.push(weekDays);
+        monthHeaders.push(monthLabel);
+      }
+
+      if (summaryEl) {
+        summaryEl.textContent = `${bannedDaysCount} ${bannedDaysCount === 1 ? 'day' : 'days'} banned in the last year`;
+      }
+
+      const monthRowHtml = `
+        <div class="flex items-center mb-1.5 pl-7 gap-[3px]">
+          ${monthHeaders
+            .map(
+              (lbl) => `
+            <div class="w-[11px] text-[10px] leading-none text-[#656d76] dark:text-[#8b949e] overflow-visible whitespace-nowrap">
+              ${lbl}
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      `;
+
+      const dayLabelsHtml = `
+        <div class="flex flex-col justify-between pr-1.5 text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] select-none py-[1px]">
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Mon</span>
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Wed</span>
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Fri</span>
+          <span class="h-[11px]"></span>
+        </div>
+      `;
+
+      const columnsHtml = weeks
+        .map(
+          (week) => `
+          <div class="flex flex-col gap-[3px]">
+            ${week
+              .map((day) => {
+                if (day.isFuture) {
+                  return `<div class="gh-cell gh-cell-future"></div>`;
+                }
+                const cls = day.banned ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
+                const statusLabel = day.banned ? 'Banned' : 'Inactive';
+                return `<div
+                  class="${cls}"
+                  onmouseenter="showHeatmapTooltip(event, '${escapeHtml(day.dateStr)}', '${statusLabel}')"
+                  onmouseleave="hideHeatmapTooltip()"
+                  onclick="showHeatmapTooltip(event, '${escapeHtml(day.dateStr)}', '${statusLabel}')"
+                ></div>`;
+              })
+              .join('')}
+          </div>
+        `
+        )
+        .join('');
+
+      container.innerHTML = `
+        ${monthRowHtml}
+        <div class="flex items-stretch">
+          ${dayLabelsHtml}
+          <div class="flex gap-[3px]">
+            ${columnsHtml}
+          </div>
+        </div>
+      `;
+
+      requestAnimationFrame(() => {
+        const scrollWrap = document.getElementById('detailHeatmapScroll');
+        if (scrollWrap) {
+          scrollWrap.scrollLeft = scrollWrap.scrollWidth;
+        }
+      });
     }
 
-    function showToast(msg) {
+    function showHeatmapTooltip(event, dateStr, detailStr) {
+      const tip = document.getElementById('heatmapTooltip');
+      const dateEl = document.getElementById('heatmapTooltipDate');
+      const detailEl = document.getElementById('heatmapTooltipDetail');
+      if (!tip || !dateEl || !detailEl) return;
+
+      dateEl.textContent = dateStr;
+      detailEl.textContent = detailStr;
+      tip.classList.remove('hidden');
+
+      const rect = event.target.getBoundingClientRect();
+      const tipRect = tip.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - tipRect.width / 2;
+      let top = rect.top - tipRect.height - 8;
+
+      left = Math.max(8, Math.min(window.innerWidth - tipRect.width - 8, left));
+      if (top < 8) {
+        top = rect.bottom + 8;
+      }
+
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+    }
+
+    function hideHeatmapTooltip() {
+      const tip = document.getElementById('heatmapTooltip');
+      if (tip) tip.classList.add('hidden');
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. MODAL CONTROLS & CRUD ACTIONS (START, UPDATE, CANCEL ONLY)
+    // -------------------------------------------------------------------------
+    function showToast(message, durationMs = 3500) {
       const banner = document.getElementById('toastBanner');
-      const text = document.getElementById('toastMessage');
-      if (!banner || !text) return;
+      const msgEl = document.getElementById('toastMessage');
+      if (!banner || !msgEl) return;
 
-      text.textContent = msg;
+      msgEl.textContent = message;
       banner.classList.remove('hidden');
-
       if (toastTimeout) clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         hideToast();
-      }, 3600);
+      }, durationMs);
     }
 
     function hideToast() {
@@ -2017,14 +1527,653 @@
       if (banner) banner.classList.add('hidden');
     }
 
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    // --- Modal 1: Start a Ban ---
+    function openStartBanModal() {
+      document.getElementById('formStartBan').reset();
+      selectStartPreset(30, 0, false);
+      document.getElementById('modalStartBan').classList.remove('hidden');
+      setTimeout(() => document.getElementById('inputBanName')?.focus(), 60);
+    }
+
+    function closeStartBanModal() {
+      document.getElementById('modalStartBan').classList.add('hidden');
+    }
+
+    function selectStartPreset(days, hours, isForever) {
+      document.getElementById('inputStartDays').value = isForever ? 0 : days;
+      document.getElementById('inputStartHours').value = isForever ? 0 : hours;
+      document.getElementById('inputStartForever').value = isForever ? 'true' : 'false';
+
+      const customWrap = document.getElementById('startCustomDurationWrap');
+      if (customWrap) {
+        customWrap.classList.toggle('opacity-40', isForever);
+        customWrap.classList.toggle('pointer-events-none', isForever);
+      }
+
+      const activeKey = isForever ? 'forever' : `${days}d${hours}h`;
+      document.querySelectorAll('.start-preset-btn').forEach((btn) => {
+        const isMatch = btn.getAttribute('data-start-preset') === activeKey;
+        btn.classList.toggle('border-[#2ea043]', isMatch);
+        btn.classList.toggle('bg-[#2ea043]/15', isMatch);
+        btn.classList.toggle('text-[#2ea043]', isMatch);
+        btn.classList.toggle('border-[#d0d7de]', !isMatch);
+        btn.classList.toggle('dark:border-[#30363d]', !isMatch);
+      });
+    }
+
+    function onStartDurationManualInput() {
+      document.getElementById('inputStartForever').value = 'false';
+      const customWrap = document.getElementById('startCustomDurationWrap');
+      if (customWrap) {
+        customWrap.classList.remove('opacity-40', 'pointer-events-none');
+      }
+      document.querySelectorAll('.start-preset-btn').forEach((btn) => {
+        btn.classList.remove('border-[#2ea043]', 'bg-[#2ea043]/15', 'text-[#2ea043]');
+        btn.classList.add('border-[#d0d7de]', 'dark:border-[#30363d]');
+      });
+    }
+
+    async function handleStartBanSubmit(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('inputBanName');
+      const reasonInput = document.getElementById('inputBanReason');
+      const isForever = document.getElementById('inputStartForever').value === 'true';
+      const days = Math.max(0, parseInt(document.getElementById('inputStartDays').value || '0', 10));
+      const hours = Math.max(0, parseInt(document.getElementById('inputStartHours').value || '0', 10));
+
+      const name = (nameInput.value || '').trim();
+      if (!name) return;
+
+      const totalHours = days * 24 + hours;
+      if (!isForever && totalHours <= 0) {
+        showToast('Please enter at least 1 hour or select Forever ∞.');
+        return;
+      }
+
+      const now = new Date();
+      const targetEnd = isForever ? null : new Date(now.getTime() + totalHours * 3600 * 1000).toISOString();
+
+      const newBan = {
+        id: `ban_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        reason: (reasonInput.value || '').trim(),
+        startDate: now.toISOString(),
+        targetEndDate: targetEnd,
+        durationDays: isForever ? null : days,
+        durationHours: isForever ? null : hours,
+        isForever,
+        bestStreakDays: 0
+      };
+
+      appState.bans.unshift(newBan);
+      closeStartBanModal();
+      await persistAndSync(`Started ban: "${name}"`);
+    }
+
+    // --- Modal 2: Ban Detail & 53-Week Graph ---
+    function openBanDetailModal(banId) {
+      const ban = appState.bans.find((b) => b.id === banId);
+      if (!ban) return;
+
+      hideCancelConfirm();
+      hideHeatmapTooltip();
+
+      document.getElementById('detailBanId').value = ban.id;
+      document.getElementById('detailBanName').textContent = ban.name;
+      document.getElementById('detailTotalDuration').textContent = `Total: ${formatTotalDuration(ban)}`;
+
+      const metrics = computeBanMetrics(ban, Date.now());
+      const timerStr = `${metrics.days}d ${String(metrics.hours).padStart(2, '0')}h ${String(metrics.minutes).padStart(2, '0')}m ${String(metrics.seconds).padStart(2, '0')}s`;
+      const remStr = ban.isForever
+        ? 'Forever ∞'
+        : metrics.isCompleted
+        ? 'Done'
+        : `${formatDurationCompact(metrics.remainingMs)} left`;
+
+      document.getElementById('detailLiveTimer').textContent = timerStr;
+      document.getElementById('detailRemainingText').textContent = remStr;
+      document.getElementById('detailStartDate').textContent = formatDateTimeSingleLine(ban.startDate);
+      document.getElementById('detailEndDate').textContent = ban.isForever ? 'Forever ∞' : formatDateTimeSingleLine(ban.targetEndDate);
+      document.getElementById('detailProgressBar').style.width = `${metrics.progressPct.toFixed(2)}%`;
+
+      const reasonBox = document.getElementById('detailReasonBox');
+      const reasonText = document.getElementById('detailReasonText');
+      if (ban.reason && ban.reason.trim()) {
+        reasonText.textContent = ban.reason;
+        reasonBox.classList.remove('hidden');
+      } else {
+        reasonBox.classList.add('hidden');
+      }
+
+      document.getElementById('modalBanDetail').classList.remove('hidden');
+      renderBanHeatmap(ban);
+    }
+
+    function closeBanDetailModal() {
+      hideHeatmapTooltip();
+      hideCancelConfirm();
+      document.getElementById('modalBanDetail').classList.add('hidden');
+    }
+
+    function showCancelConfirm() {
+      document.getElementById('cancelConfirmBox')?.classList.remove('hidden');
+    }
+
+    function hideCancelConfirm() {
+      document.getElementById('cancelConfirmBox')?.classList.add('hidden');
+    }
+
+    async function confirmCancelActiveBan() {
+      const banId = document.getElementById('detailBanId').value;
+      const idx = appState.bans.findIndex((b) => b.id === banId);
+      if (idx === -1) return;
+
+      const ban = appState.bans[idx];
+      const nowMs = Date.now();
+      const metrics = computeBanMetrics(ban, nowMs);
+
+      const archivedBan = {
+        ...ban,
+        status: 'cancelled',
+        endedAt: new Date(nowMs).toISOString(),
+        finalStreakDays: metrics.days,
+        bestStreakDays: metrics.bestStreakDays
+      };
+
+      appState.bans.splice(idx, 1);
+      appState.savedBans.unshift(archivedBan);
+
+      closeBanDetailModal();
+      await persistAndSync(`Cancelled & archived: "${ban.name}"`);
+    }
+
+    // --- Modal 3: Update Active Ban ---
+    function openUpdateBanModal() {
+      const banId = document.getElementById('detailBanId').value;
+      const ban = appState.bans.find((b) => b.id === banId);
+      if (!ban) return;
+
+      document.getElementById('updateBanId').value = ban.id;
+      document.getElementById('updateBanName').value = ban.name;
+      document.getElementById('updateBanReason').value = ban.reason || '';
+
+      if (ban.isForever || !ban.targetEndDate) {
+        setUpdateForeverState(true, 30, 0);
+      } else {
+        const totalMs = Math.max(0, new Date(ban.targetEndDate).getTime() - new Date(ban.startDate).getTime());
+        const totalHours = Math.max(1, Math.round(totalMs / 3600000));
+        const d = Math.floor(totalHours / 24);
+        const h = totalHours % 24;
+        setUpdateForeverState(false, d, h);
+      }
+
+      document.getElementById('modalUpdateBan').classList.remove('hidden');
+    }
+
+    function closeUpdateBanModal() {
+      document.getElementById('modalUpdateBan').classList.add('hidden');
+    }
+
+    function setUpdateForeverState(isForever, days = 30, hours = 0) {
+      document.getElementById('updateIsForever').value = isForever ? 'true' : 'false';
+      document.getElementById('updateDurationDays').value = days;
+      document.getElementById('updateDurationHours').value = hours;
+
+      const wrap = document.getElementById('updateCustomDurationWrap');
+      const btnForever = document.getElementById('btnUpdateForever');
+      if (wrap) {
+        wrap.classList.toggle('opacity-40', isForever);
+        wrap.classList.toggle('pointer-events-none', isForever);
+      }
+      if (btnForever) {
+        btnForever.classList.toggle('border-[#2ea043]', isForever);
+        btnForever.classList.toggle('bg-[#2ea043]/15', isForever);
+        btnForever.classList.toggle('text-[#2ea043]', isForever);
+      }
+    }
+
+    function toggleUpdateForever() {
+      const current = document.getElementById('updateIsForever').value === 'true';
+      const d = Math.max(0, parseInt(document.getElementById('updateDurationDays').value || '30', 10));
+      const h = Math.max(0, parseInt(document.getElementById('updateDurationHours').value || '0', 10));
+      setUpdateForeverState(!current, d === 0 && h === 0 ? 30 : d, h);
+    }
+
+    function extendUpdateHours(addHours) {
+      const d = Math.max(0, parseInt(document.getElementById('updateDurationDays').value || '0', 10));
+      const h = Math.max(0, parseInt(document.getElementById('updateDurationHours').value || '0', 10));
+      const total = d * 24 + h + addHours;
+      setUpdateForeverState(false, Math.floor(total / 24), total % 24);
+    }
+
+    async function handleUpdateBanSubmit(event) {
+      event.preventDefault();
+      const banId = document.getElementById('updateBanId').value;
+      const ban = appState.bans.find((b) => b.id === banId);
+      if (!ban) return;
+
+      const newName = (document.getElementById('updateBanName').value || '').trim();
+      if (!newName) return;
+
+      const isForever = document.getElementById('updateIsForever').value === 'true';
+      const days = Math.max(0, parseInt(document.getElementById('updateDurationDays').value || '0', 10));
+      const hours = Math.max(0, parseInt(document.getElementById('updateDurationHours').value || '0', 10));
+      const totalHours = days * 24 + hours;
+
+      if (!isForever && totalHours <= 0) {
+        showToast('Please enter at least 1 hour or select Forever ∞.');
+        return;
+      }
+
+      ban.name = newName;
+      ban.reason = (document.getElementById('updateBanReason').value || '').trim();
+      ban.isForever = isForever;
+      ban.durationDays = isForever ? null : days;
+      ban.durationHours = isForever ? null : hours;
+      ban.targetEndDate = isForever
+        ? null
+        : new Date(new Date(ban.startDate).getTime() + totalHours * 3600 * 1000).toISOString();
+
+      closeUpdateBanModal();
+      await persistAndSync(`Updated ban: "${ban.name}"`);
+      await checkFinishedBans(false);
+
+      if (appState.bans.some((b) => b.id === ban.id)) {
+        openBanDetailModal(ban.id);
+      }
+    }
+
+    // --- Modal 4: GitHub Configuration & Local JSON Backup ---
+    function openGithubModal() {
+      document.getElementById('ghOwner').value = githubConfig.owner || 'ahmedbentabet';
+      document.getElementById('ghRepo').value = githubConfig.repo || 'mybans-data';
+      document.getElementById('ghPath').value = githubConfig.path || 'mybans.json';
+      document.getElementById('ghBranch').value = githubConfig.branch || 'master';
+      document.getElementById('ghToken').value = githubConfig.token || '';
+      setGhFeedback('');
+      document.getElementById('modalGithub').classList.remove('hidden');
+    }
+
+    function closeGithubModal() {
+      document.getElementById('modalGithub').classList.add('hidden');
+    }
+
+    async function handleSaveAndSyncGithub(event) {
+      event.preventDefault();
+      const owner = (document.getElementById('ghOwner').value || '').trim();
+      const repo = (document.getElementById('ghRepo').value || '').trim();
+      const path = (document.getElementById('ghPath').value || 'mybans.json').trim() || 'mybans.json';
+      const branch = (document.getElementById('ghBranch').value || 'master').trim() || 'master';
+      const token = (document.getElementById('ghToken').value || '').trim();
+
+      if (!owner || !repo || !token) {
+        setGhFeedback('Please fill in GitHub Username, Repository Name, and Personal Access Token.', 'error');
+        return;
+      }
+
+      const configChanged =
+        githubConfig.owner !== owner ||
+        githubConfig.repo !== repo ||
+        githubConfig.path !== path ||
+        githubConfig.branch !== branch;
+
+      githubConfig = {
+        owner,
+        repo,
+        path,
+        branch,
+        token,
+        sha: configChanged ? null : githubConfig.sha
+      };
+
+      saveGithubConfig();
+      const btn = document.getElementById('btnSaveAndSync');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Syncing...';
+      }
+      setGhFeedback('Connecting to GitHub...', 'info');
+
+      await smartSyncGithub(true, false);
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Save & Sync';
+      }
+    }
+
+    function disconnectGithub() {
+      githubConfig = {
+        owner: 'ahmedbentabet',
+        repo: 'mybans-data',
+        path: 'mybans.json',
+        branch: 'master',
+        token: '',
+        sha: null
+      };
+      try {
+        localStorage.removeItem(STORAGE_KEY_GH);
+      } catch (e) {
+        // Ignore storage errors
+      }
+      document.getElementById('ghOwner').value = 'ahmedbentabet';
+      document.getElementById('ghRepo').value = 'mybans-data';
+      document.getElementById('ghPath').value = 'mybans.json';
+      document.getElementById('ghBranch').value = 'master';
+      document.getElementById('ghToken').value = '';
+      updateSyncStatusUI();
+      setGhFeedback('Disconnected from GitHub. Using local storage.', 'info');
+    }
+
+    function exportJsonFile() {
+      const payload = JSON.stringify(buildSerializableJsonPayload(), null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mybans.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Exported mybans.json');
+    }
+
+    async function importJsonFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const parsed = normalizeLoadedState(JSON.parse(text));
+        appState = {
+          ...parsed,
+          lastUpdated: new Date().toISOString()
+        };
+        event.target.value = '';
+        closeGithubModal();
+        await persistAndSync(`Imported ${appState.bans.length} active ban(s) from JSON.`);
+      } catch (e) {
+        setGhFeedback('Invalid JSON file. Please select a valid mybans.json backup.', 'error');
+      }
+    }
+
+    // --- Modal 5: Achievements & Saved Bans ---
+    function openAchievementsModal() {
+      currentAchievementsTab = 'completed';
+      expandedAchievementKey = null;
+      updateAchievementsTabButtons();
+      renderAchievementsList();
+      document.getElementById('modalAchievements').classList.remove('hidden');
+    }
+
+    function closeAchievementsModal() {
+      hideHeatmapTooltip();
+      document.getElementById('modalAchievements').classList.add('hidden');
+    }
+
+    function setAchievementsTab(tab) {
+      currentAchievementsTab = tab;
+      expandedAchievementKey = null;
+      updateAchievementsTabButtons();
+      renderAchievementsList();
+    }
+
+    function updateAchievementsTabButtons() {
+      const btnCompleted = document.getElementById('tabAchCompleted');
+      const btnCancelled = document.getElementById('tabAchCancelled');
+      if (!btnCompleted || !btnCancelled) return;
+
+      const isComp = currentAchievementsTab === 'completed';
+      btnCompleted.className = isComp
+        ? 'px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
+        : 'px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] text-[#656d76] dark:text-[#8b949e] hover:border-[#2ea043] transition';
+
+      btnCancelled.className = !isComp
+        ? 'px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043] transition'
+        : 'px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[#d0d7de] dark:border-[#30363d] text-[#656d76] dark:text-[#8b949e] hover:border-[#2ea043] transition';
+    }
+
+    function toggleAchievementGraph(itemKey) {
+      expandedAchievementKey = expandedAchievementKey === itemKey ? null : itemKey;
+      renderAchievementsList();
+    }
+
+    function buildArchivedHeatmapHtml(ban) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const banStart = new Date(ban.startDate);
+      banStart.setHours(0, 0, 0, 0);
+
+      const banEnd = new Date(ban.endedAt || ban.targetEndDate || today);
+      banEnd.setHours(0, 0, 0, 0);
+
+      const dayOfWeek = today.getDay();
+      const endOfGrid = new Date(today);
+      endOfGrid.setDate(today.getDate() + (6 - dayOfWeek));
+
+      const totalWeeks = 53;
+      const startOfGrid = new Date(endOfGrid);
+      startOfGrid.setDate(endOfGrid.getDate() - (totalWeeks * 7 - 1));
+
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const weeks = [];
+      const monthHeaders = [];
+      let lastMonthShown = -1;
+
+      const cursor = new Date(startOfGrid);
+      for (let w = 0; w < totalWeeks; w++) {
+        const weekDays = [];
+        let monthLabel = '';
+
+        for (let d = 0; d < 7; d++) {
+          const cellDate = new Date(cursor);
+          const cellMs = cellDate.getTime();
+          const isFuture = cellMs > today.getTime();
+          const banned = !isFuture && cellMs >= banStart.getTime() && cellMs <= banEnd.getTime();
+
+          if (d === 0) {
+            const m = cellDate.getMonth();
+            if (m !== lastMonthShown) {
+              monthLabel = monthNames[m];
+              lastMonthShown = m;
+            }
+          }
+
+          weekDays.push({
+            dateStr: cellDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+            isFuture,
+            banned
+          });
+
+          cursor.setDate(cursor.getDate() + 1);
+        }
+
+        weeks.push(weekDays);
+        monthHeaders.push(monthLabel);
+      }
+
+      const monthRowHtml = `
+        <div class="flex items-center mb-1.5 pl-7 gap-[3px]">
+          ${monthHeaders
+            .map(
+              (lbl) => `
+            <div class="w-[11px] text-[10px] leading-none text-[#656d76] dark:text-[#8b949e] overflow-visible whitespace-nowrap">
+              ${lbl}
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      `;
+
+      const dayLabelsHtml = `
+        <div class="flex flex-col justify-between pr-1.5 text-[10px] leading-[11px] text-[#656d76] dark:text-[#8b949e] select-none py-[1px]">
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Mon</span>
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Wed</span>
+          <span class="h-[11px]"></span>
+          <span class="h-[11px]">Fri</span>
+          <span class="h-[11px]"></span>
+        </div>
+      `;
+
+      const columnsHtml = weeks
+        .map(
+          (week) => `
+          <div class="flex flex-col gap-[3px]">
+            ${week
+              .map((day) => {
+                if (day.isFuture) return `<div class="gh-cell gh-cell-future"></div>`;
+                const cls = day.banned ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
+                const statusLabel = day.banned ? 'Banned' : 'Inactive';
+                return `<div
+                  class="${cls}"
+                  onmouseenter="showHeatmapTooltip(event, '${escapeHtml(day.dateStr)}', '${statusLabel}')"
+                  onmouseleave="hideHeatmapTooltip()"
+                  onclick="event.stopPropagation(); showHeatmapTooltip(event, '${escapeHtml(day.dateStr)}', '${statusLabel}')"
+                ></div>`;
+              })
+              .join('')}
+          </div>
+        `
+        )
+        .join('');
+
+      return `
+        <div class="mt-3 pt-3 border-t border-[#d0d7de]/70 dark:border-[#30363d]">
+          <div class="heatmap-scroll overflow-x-auto pb-1" id="ach-scroll-${escapeHtml(ban.id || '')}">
+            <div class="inline-block min-w-max">
+              ${monthRowHtml}
+              <div class="flex items-stretch">
+                ${dayLabelsHtml}
+                <div class="flex gap-[3px]">
+                  ${columnsHtml}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAchievementsList() {
+      const container = document.getElementById('achievementsListContainer');
+      const totalCompEl = document.getElementById('achTotalCompleted');
+      const totalTimeEl = document.getElementById('achTotalTimeWon');
+      if (!container) return;
+
+      const allSaved = Array.isArray(appState.savedBans) ? appState.savedBans : [];
+      const completedBans = allSaved.filter((b) => b.status === 'completed');
+
+      if (totalCompEl) {
+        totalCompEl.textContent = String(completedBans.length);
+      }
+
+      if (totalTimeEl) {
+        let totalCompletedMs = 0;
+        for (const b of completedBans) {
+          const endRef = b.endedAt || b.targetEndDate || b.startDate;
+          totalCompletedMs += Math.max(0, new Date(endRef).getTime() - new Date(b.startDate).getTime());
+        }
+        const totalHours = Math.round(totalCompletedMs / 3600000);
+        const d = Math.floor(totalHours / 24);
+        const h = totalHours % 24;
+        totalTimeEl.textContent = d > 0 ? (h > 0 ? `${d}d ${h}h` : `${d}d`) : `${totalHours}h`;
+      }
+
+      const filtered = allSaved.filter((b) =>
+        currentAchievementsTab === 'completed' ? b.status === 'completed' : b.status !== 'completed'
+      );
+
+      if (filtered.length === 0) {
+        const emptyTitle =
+          currentAchievementsTab === 'completed'
+            ? 'No completed bans yet'
+            : 'No cancelled bans';
+        const emptyDesc =
+          currentAchievementsTab === 'completed'
+            ? 'When a ban reaches its end date, it is automatically saved here as an achievement.'
+            : 'Any ban you cancel early is archived here.';
+
+        container.innerHTML = `
+          <div class="rounded-2xl border border-dashed border-[#d0d7de] dark:border-[#30363d] p-8 text-center">
+            <div class="text-sm font-semibold mb-1">${emptyTitle}</div>
+            <p class="text-xs text-[#656d76] dark:text-[#8b949e] max-w-xs mx-auto leading-relaxed">${emptyDesc}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered
+        .map((ban, idx) => {
+          const itemKey = `${ban.id || 'saved'}_${idx}`;
+          const isCompleted = ban.status === 'completed';
+          const endIso = ban.endedAt || ban.targetEndDate;
+          const achievedMs = endIso ? Math.max(0, new Date(endIso).getTime() - new Date(ban.startDate).getTime()) : 0;
+          const achievedHours = Math.round(achievedMs / 3600000);
+          const achDays = Math.floor(achievedHours / 24);
+          const achRemHours = achievedHours % 24;
+          const achievedLabel = isCompleted
+            ? formatTotalDuration(ban)
+            : achDays > 0
+            ? `${achDays}d ${achRemHours}h`
+            : `${Math.max(0, achRemHours)}h`;
+
+          const isExpanded = expandedAchievementKey === itemKey;
+
+          return `
+            <div
+              onclick="toggleAchievementGraph('${escapeHtml(itemKey)}')"
+              class="cursor-pointer rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] hover:border-[#2ea043] p-4 transition"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                      isCompleted
+                        ? 'bg-[#2ea043]/15 text-[#2ea043]'
+                        : 'bg-[#8b949e]/15 text-[#656d76] dark:text-[#8b949e]'
+                    }">
+                      ${isCompleted ? '✓ Completed' : 'Cancelled'}
+                    </span>
+                    <span class="text-xs font-semibold text-[#2ea043]">
+                      ${escapeHtml(achievedLabel)}
+                    </span>
+                  </div>
+                  <h4 class="text-sm sm:text-base font-semibold break-words">${escapeHtml(ban.name)}</h4>
+                </div>
+                <span class="text-xs text-[#656d76] dark:text-[#8b949e] shrink-0">
+                  ${isExpanded ? '▲' : '▼'}
+                </span>
+              </div>
+
+              <div class="mt-2 text-[11px] text-[#656d76] dark:text-[#8b949e] flex flex-wrap gap-x-3 gap-y-1">
+                <span>Start: <strong class="font-medium text-[#1f2328] dark:text-[#e6edf3]">${escapeHtml(formatDateTimeSingleLine(ban.startDate))}</strong></span>
+                <span>End: <strong class="font-medium text-[#1f2328] dark:text-[#e6edf3]">${escapeHtml(formatDateTimeSingleLine(endIso))}</strong></span>
+              </div>
+
+              ${
+                ban.reason && ban.reason.trim()
+                  ? `<p class="mt-2 text-xs text-[#656d76] dark:text-[#8b949e] leading-relaxed break-words">${escapeHtml(ban.reason)}</p>`
+                  : ''
+              }
+
+              ${isExpanded ? buildArchivedHeatmapHtml(ban) : ''}
+            </div>
+          `;
+        })
+        .join('');
+
+      if (expandedAchievementKey) {
+        requestAnimationFrame(() => {
+          container.querySelectorAll('.heatmap-scroll').forEach((el) => {
+            el.scrollLeft = el.scrollWidth;
+          });
+        });
+      }
     }
   </script>
 </body>
