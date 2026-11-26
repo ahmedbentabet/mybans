@@ -309,6 +309,14 @@
 
       <!-- Modal Body -->
       <form id="formStartBan" onsubmit="handleStartBanSubmit(event)" class="p-5 overflow-y-auto overscroll-contain flex-1 space-y-4">
+        <!-- Choose from Saved or Add New (shown when saved bans exist) -->
+        <div id="startSavedPickerWrap" class="hidden">
+          <label class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
+            Choose from saved or add new
+          </label>
+          <div id="startSavedPills" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-0.5"></div>
+        </div>
+
         <div>
           <label for="inputBanName" class="block text-xs font-medium text-[#656d76] dark:text-[#8b949e] mb-1.5">
             What are you banning?
@@ -318,6 +326,7 @@
             type="text"
             required
             maxlength="80"
+            oninput="onStartBanNameInput()"
             placeholder="e.g., Sugar, Late-night scrolling, Toxic person..."
             class="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl text-base sm:text-sm border border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] focus:outline-none focus:border-[#2ea043]"
           />
@@ -910,23 +919,236 @@
       token: '',
       sha: null
     };
-// ... existing code ... -->
+
+    let isSyncInProgress = false;
+    let hasUnsyncedLocalChanges = false;
+    let liveTickerInterval = null;
+    let toastTimeout = null;
+    let currentAchievementsTab = 'completed';
+    let expandedAchievementKey = null;
+    let selectedSavedBanKey = '__new__';
+
+    // -------------------------------------------------------------------------
+    // 2. THEME MANAGEMENT (Dark / Light Mode)
+    // -------------------------------------------------------------------------
+    function applyTheme(theme) {
+      const isDark = theme !== 'light';
+      document.documentElement.classList.toggle('dark', isDark);
+      const metaTheme = document.getElementById('metaThemeColor');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', isDark ? '#0d1117' : '#ffffff');
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+      } catch (e) {
+        // Ignore localStorage restrictions
+      }
+    }
+
+    function initTheme() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem(STORAGE_KEY_THEME);
+      } catch (e) {
+        saved = null;
+      }
+      if (saved === 'light' || saved === 'dark') {
+        applyTheme(saved);
+      } else {
+        applyTheme('dark');
+      }
+    }
+
+    function toggleTheme() {
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      applyTheme(isCurrentlyDark ? 'light' : 'dark');
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. FORMATTING & METRICS HELPERS
+    // -------------------------------------------------------------------------
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDateTimeSingleLine(isoString) {
+      if (!isoString) return '—';
+      const d = new Date(isoString);
+      if (Number.isNaN(d.getTime())) return '—';
+      const datePart = d.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      const timePart = d
+        .toLocaleTimeString(undefined, {
+          hour: 'numeric',
+          minute: '2-digit'
+        })
+        .replace(/\s+(AM|PM|am|pm)$/, '\u00A0$1');
+      return `${datePart} · ${timePart}`;
+    }
+
+    function formatDurationCompact(ms) {
+      const safeMs = Math.max(0, ms);
+      const totalSeconds = Math.floor(safeMs / 1000);
+      if (totalSeconds < 60) {
+        return `${totalSeconds}s`;
+      }
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      if (totalMinutes < 60) {
+        const secs = totalSeconds % 60;
+        return `${totalMinutes}m ${String(secs).padStart(2, '0')}s`;
+      }
+      const totalHours = Math.floor(totalMinutes / 60);
+      const remMinutes = totalMinutes % 60;
+      if (totalHours < 24) {
+        return remMinutes > 0 ? `${totalHours}h ${remMinutes}m` : `${totalHours}h`;
+      }
+      const days = Math.floor(totalHours / 24);
+      const remHours = totalHours % 24;
+      return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+    }
+
+    function formatTotalDuration(ban) {
+      if (!ban || ban.isForever || !ban.targetEndDate) {
+        return 'Forever ∞';
+      }
+      let totalHours = 0;
+      if (typeof ban.durationDays === 'number' || typeof ban.durationHours === 'number') {
+        totalHours = Math.max(1, (Number(ban.durationDays) || 0) * 24 + (Number(ban.durationHours) || 0));
+      } else {
+        const diffMs = Math.max(0, new Date(ban.targetEndDate).getTime() - new Date(ban.startDate).getTime());
+        totalHours = Math.max(1, Math.round(diffMs / 3600000));
+      }
+      const days = Math.floor(totalHours / 24);
+      const hours = totalHours % 24;
+      if (days > 0 && hours > 0) return `${days}d ${hours}h`;
+      if (days > 0) return `${days}d`;
+      return `${hours}h`;
+    }
+
+    function computeBanMetrics(ban, nowMs = Date.now()) {
+      const startMs = new Date(ban.startDate).getTime();
+      const elapsedMs = Math.max(0, nowMs - startMs);
+      const totalSeconds = Math.floor(elapsedMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const bestStreakDays = Math.max(Number(ban.bestStreakDays) || 0, days);
+
+      if (ban.isForever || !ban.targetEndDate) {
+        const milestoneProgress = Math.min(100, ((elapsedMs / 86400000) / 30) * 100);
+        return {
+          elapsedMs,
+          days,
+          hours,
+          minutes,
+          seconds,
+          bestStreakDays,
+          remainingMs: Infinity,
+          progressPct: milestoneProgress,
+          isCompleted: false
+        };
+      }
+
+      const endMs = new Date(ban.targetEndDate).getTime();
+      const totalDurationMs = Math.max(1000, endMs - startMs);
+      const remainingMs = Math.max(0, endMs - nowMs);
+      const isCompleted = nowMs >= endMs;
+      const progressPct = isCompleted
+        ? 100
+        : Math.min(100, Math.max(0, (elapsedMs / totalDurationMs) * 100));
+
+      return {
+        elapsedMs,
+        days,
+        hours,
+        minutes,
+        seconds,
+        bestStreakDays,
+        remainingMs,
+        progressPct,
+        isCompleted
+      };
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. LOCAL & GITHUB JSON PERSISTENCE
+    // -------------------------------------------------------------------------
+    function normalizeLoadedState(raw) {
+      const obj = raw && typeof raw === 'object' ? raw : {};
+      return {
+        app: 'MyBans',
+        version: 2,
+        lastUpdated: obj.lastUpdated || null,
+        lastSyncedAt: obj.lastSyncedAt || null,
+        bans: Array.isArray(obj.bans) ? obj.bans : [],
+        savedBans: Array.isArray(obj.savedBans) ? obj.savedBans : []
+      };
+    }
+
+    function buildSerializableJsonPayload() {
+      const nowMs = Date.now();
+      const normalizedBans = (appState.bans || []).map((ban) => {
+        const m = computeBanMetrics(ban, nowMs);
+        return {
+          ...ban,
+          currentStreakDays: m.days,
+          bestStreakDays: m.bestStreakDays
+        };
+      });
+
+      return {
+        app: 'MyBans',
+        version: 2,
+        lastUpdated: appState.lastUpdated || new Date(nowMs).toISOString(),
+        bans: normalizedBans,
+        savedBans: Array.isArray(appState.savedBans) ? appState.savedBans : []
+      };
+    }
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_DATA);
+        if (raw) {
+          appState = normalizeLoadedState(JSON.parse(raw));
+        }
+      } catch (e) {
+        // Fallback to clean empty state
+      }
+    }
+
+    function saveLocalState() {
+      try {
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(appState));
+      } catch (e) {
+        // Ignore quota/storage errors
+      }
+    }
+
     function loadGithubConfig() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_GH);
         if (raw) {
           const parsed = JSON.parse(raw);
           githubConfig = {
-            owner: (parsed.owner || 'ahmedbentabet').trim() || 'ahmedbentabet',
-            repo: (parsed.repo || 'mybans-data').trim() || 'mybans-data',
-            path: (parsed.path || 'mybans.json').trim() || 'mybans.json',
-            branch: (parsed.branch || 'master').trim() || 'master',
-            token: (parsed.token || '').trim(),
+            owner: parsed.owner || 'ahmedbentabet',
+            repo: parsed.repo || 'mybans-data',
+            path: parsed.path || 'mybans.json',
+            branch: parsed.branch || 'master',
+            token: parsed.token || '',
             sha: parsed.sha || null
           };
         }
       } catch (e) {
-        // Ignore parse errors
+        // Ignore storage errors
       }
       updateSyncStatusUI();
     }
@@ -941,77 +1163,91 @@
     }
 
     function isGithubConfigured() {
-      return Boolean(githubConfig.owner && githubConfig.repo && githubConfig.path && githubConfig.token);
+      return Boolean(githubConfig.owner && githubConfig.repo && githubConfig.token);
     }
 
-    function utf8ToBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary);
-    }
-
-    function base64ToUtf8(b64) {
-      const cleanB64 = (b64 || '').replace(/\s+/g, '');
-      const binary = atob(cleanB64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return new TextDecoder().decode(bytes);
-    }
-
-    function updateSyncStatusUI(stateOverride = null) {
+    function setSyncState(state, customText) {
       const dot = document.getElementById('syncDot');
       const label = document.getElementById('syncLabel');
       if (!dot || !label) return;
 
-      if (!isGithubConfigured()) {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 shrink-0';
-        label.textContent = 'Local JSON';
-        return;
+      dot.className = 'w-2 h-2 rounded-full shrink-0';
+      if (state === 'syncing') {
+        dot.classList.add('bg-sky-400', 'animate-pulse');
+        label.textContent = customText || 'Syncing...';
+      } else if (state === 'synced') {
+        dot.classList.add('bg-[#2ea043]');
+        label.textContent = customText || `${githubConfig.repo}`;
+      } else if (state === 'error') {
+        dot.classList.add('bg-rose-500');
+        label.textContent = customText || 'Sync Error';
+      } else {
+        dot.classList.add('bg-amber-400');
+        label.textContent = customText || 'Local JSON';
       }
-
-      if (stateOverride === 'syncing') {
-        dot.className = 'w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0';
-        label.textContent = 'Syncing...';
-        return;
-      }
-
-      if (stateOverride === 'error') {
-        dot.className = 'w-2 h-2 rounded-full bg-rose-500 shrink-0';
-        label.textContent = 'Sync Error';
-        return;
-      }
-
-      dot.className = 'w-2 h-2 rounded-full bg-[#2ea043] shrink-0';
-      label.textContent = `${githubConfig.repo}`;
     }
 
-    function setGhFeedback(msg, type = 'info') {
+    function updateSyncStatusUI() {
+      if (!isGithubConfigured()) {
+        setSyncState('local', 'Local JSON');
+      } else if (hasUnsyncedLocalChanges) {
+        setSyncState('local', 'Pending Sync');
+      } else {
+        setSyncState('synced', githubConfig.repo || 'GitHub Synced');
+      }
+    }
+
+    function setGhFeedback(message, type = 'info') {
       const box = document.getElementById('ghFeedback');
       if (!box) return;
-      if (!msg) {
+      if (!message) {
         box.classList.add('hidden');
+        box.textContent = '';
         return;
       }
-      box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed border ';
+      box.className = 'px-3 py-2 rounded-xl text-xs leading-relaxed border';
       if (type === 'error') {
-        box.className += 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400';
+        box.classList.add('border-rose-500/40', 'bg-rose-500/10', 'text-rose-600', 'dark:text-rose-400');
       } else if (type === 'success') {
-        box.className += 'border-[#2ea043]/40 bg-[#2ea043]/10 text-[#2ea043]';
+        box.classList.add('border-[#2ea043]/40', 'bg-[#2ea043]/10', 'text-[#2ea043]');
       } else {
-        box.className += 'border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e]';
+        box.classList.add('border-[#d0d7de]', 'dark:border-[#30363d]', 'bg-[#f6f8fa]', 'dark:bg-[#0d1117]', 'text-[#656d76]', 'dark:text-[#8b949e]');
       }
-      box.textContent = msg;
+      box.textContent = message;
       box.classList.remove('hidden');
     }
 
-    async function fetchRemoteGithubFile(branchName) {
-      const cleanPath = githubConfig.path.replace(/^\/+/, '');
-      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${cleanPath}?ref=${encodeURIComponent(branchName)}&_t=${Date.now()}`;
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) {
+        bin += String.fromCharCode(bytes[i]);
+      }
+      return btoa(bin);
+    }
+
+    function base64ToUtf8(b64) {
+      const clean = (b64 || '').replace(/\s+/g, '');
+      const bin = atob(clean);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        bytes[i] = bin.charCodeAt(i);
+      }
+      return new TextDecoder().decode(bytes);
+    }
+
+    function encodeRepoFilePath(path) {
+      return (path || 'mybans.json')
+        .split('/')
+        .filter(Boolean)
+        .map((seg) => encodeURIComponent(seg))
+        .join('/');
+    }
+
+    async function fetchGithubFile(branchOverride = null) {
+      const branch = branchOverride || githubConfig.branch || 'master';
+      const encodedPath = encodeRepoFilePath(githubConfig.path);
+      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}&_t=${Date.now()}`;
 
       const res = await fetch(url, {
         method: 'GET',
@@ -1022,36 +1258,46 @@
       });
 
       if (res.status === 404) {
-        return { exists: false, sha: null, data: null };
+        return { exists: false, status: 404 };
       }
 
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.message || `GitHub API error (${res.status})`);
+        let errMsg = `GitHub API error (${res.status})`;
+        try {
+          const errBody = await res.json();
+          if (errBody && errBody.message) errMsg = errBody.message;
+        } catch (e) {
+          // Ignore parse error
+        }
+        throw new Error(errMsg);
       }
 
-      const fileMeta = await res.json();
-      const decodedText = base64ToUtf8(fileMeta.content || '');
-      const parsedData = normalizeLoadedState(JSON.parse(decodedText || '{}'));
+      const data = await res.json();
+      const decodedText = base64ToUtf8(data.content || '');
+      const parsedJson = normalizeLoadedState(JSON.parse(decodedText));
       return {
         exists: true,
-        sha: fileMeta.sha || null,
-        data: parsedData
+        sha: data.sha,
+        branch,
+        state: parsedJson
       };
     }
 
-    async function pushRemoteGithubFile(shaToUse) {
-      const cleanPath = githubConfig.path.replace(/^\/+/, '');
-      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${cleanPath}`;
-      const jsonString = JSON.stringify(buildSerializableJsonPayload(), null, 2);
+    async function pushGithubFile(shaOverride = null) {
+      const branch = githubConfig.branch || 'master';
+      const encodedPath = encodeRepoFilePath(githubConfig.path);
+      const url = `https://api.github.com/repos/${encodeURIComponent(githubConfig.owner)}/${encodeURIComponent(githubConfig.repo)}/contents/${encodedPath}`;
 
+      const jsonText = JSON.stringify(buildSerializableJsonPayload(), null, 2);
       const body = {
-        message: `Update ${cleanPath} via MyBans`,
-        content: utf8ToBase64(jsonString),
-        branch: githubConfig.branch
+        message: `Update ${githubConfig.path} via MyBans`,
+        content: utf8ToBase64(jsonText),
+        branch
       };
-      if (shaToUse) {
-        body.sha = shaToUse;
+
+      const activeSha = shaOverride !== null ? shaOverride : githubConfig.sha;
+      if (activeSha) {
+        body.sha = activeSha;
       }
 
       const res = await fetch(url, {
@@ -1065,86 +1311,117 @@
       });
 
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.message || `GitHub push failed (${res.status})`);
+        let errMsg = `GitHub push failed (${res.status})`;
+        try {
+          const errBody = await res.json();
+          if (errBody && errBody.message) errMsg = errBody.message;
+        } catch (e) {
+          // Ignore parse error
+        }
+        const err = new Error(errMsg);
+        err.status = res.status;
+        throw err;
       }
 
       const result = await res.json();
       if (result && result.content && result.content.sha) {
         githubConfig.sha = result.content.sha;
-        saveGithubConfig();
       }
+      hasUnsyncedLocalChanges = false;
+      appState.lastSyncedAt = new Date().toISOString();
+      saveLocalState();
+      saveGithubConfig();
     }
 
-    async function smartSyncGithub(showModalFeedback = false, forcePushLocal = false) {
+    async function smartSyncGithub(isManual = false, pushFirst = false) {
       if (!isGithubConfigured() || isSyncInProgress) return;
       isSyncInProgress = true;
-      updateSyncStatusUI('syncing');
+      setSyncState('syncing', 'Syncing...');
 
       try {
-        let remote = await fetchRemoteGithubFile(githubConfig.branch);
+        let remote = await fetchGithubFile(githubConfig.branch);
 
-        // Auto-detect master vs main if file wasn't found on the configured branch
-        if (!remote.exists) {
-          const altBranch = githubConfig.branch === 'master' ? 'main' : githubConfig.branch === 'main' ? 'master' : null;
-          if (altBranch) {
-            const altRemote = await fetchRemoteGithubFile(altBranch);
+        // Auto-detect master vs main if file wasn't found on configured branch
+        if (!remote.exists && (githubConfig.branch === 'master' || githubConfig.branch === 'main')) {
+          const altBranch = githubConfig.branch === 'master' ? 'main' : 'master';
+          try {
+            const altRemote = await fetchGithubFile(altBranch);
             if (altRemote.exists) {
               githubConfig.branch = altBranch;
+              const branchInput = document.getElementById('ghBranch');
+              if (branchInput) branchInput.value = altBranch;
               remote = altRemote;
-              saveGithubConfig();
             }
+          } catch (e) {
+            // Keep original branch if alternate branch doesn't exist
           }
         }
 
-        const localHasData = appState.bans.length > 0 || appState.savedBans.length > 0;
-
-        if (remote.exists) {
-          githubConfig.sha = remote.sha;
-          saveGithubConfig();
-
-          const remoteTime = remote.data.lastUpdated ? new Date(remote.data.lastUpdated).getTime() : 0;
-          const localTime = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
-
-          if (!forcePushLocal && !hasUnsyncedLocalChanges && (!localHasData || remoteTime >= localTime)) {
-            appState = {
-              ...remote.data,
-              lastSyncedAt: new Date().toISOString()
-            };
-            saveLocalState();
-            renderAll();
-            updateSyncStatusUI('ok');
-            if (showModalFeedback) {
-              setGhFeedback(`Synced! Loaded ${appState.bans.length} active ban(s) from ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
-            }
-          } else {
-            await pushRemoteGithubFile(remote.sha);
-            hasUnsyncedLocalChanges = false;
-            appState.lastSyncedAt = new Date().toISOString();
-            saveLocalState();
-            updateSyncStatusUI('ok');
-            if (showModalFeedback) {
-              setGhFeedback(`Saved & synced to ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
-            }
+        if (!remote.exists) {
+          // File does not exist yet on GitHub — create it from current local state
+          if (!appState.lastUpdated) {
+            appState.lastUpdated = new Date().toISOString();
+          }
+          await pushGithubFile(null);
+          if (isManual) {
+            setGhFeedback(`Connected! Created ${githubConfig.path} on branch "${githubConfig.branch}".`, 'success');
+            showToast(`Synced & created ${githubConfig.path} on GitHub.`);
           }
         } else {
-          // Remote JSON file does not exist yet — create it
-          await pushRemoteGithubFile(null);
-          hasUnsyncedLocalChanges = false;
-          appState.lastSyncedAt = new Date().toISOString();
-          saveLocalState();
-          updateSyncStatusUI('ok');
-          if (showModalFeedback) {
-            setGhFeedback(`Created ${githubConfig.path} in ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+          githubConfig.sha = remote.sha;
+          const remoteTs = remote.state.lastUpdated ? new Date(remote.state.lastUpdated).getTime() : 0;
+          const localTs = appState.lastUpdated ? new Date(appState.lastUpdated).getTime() : 0;
+          const localHasData = appState.bans.length > 0 || appState.savedBans.length > 0;
+
+          if (pushFirst || hasUnsyncedLocalChanges || (localHasData && localTs > remoteTs)) {
+            await pushGithubFile(remote.sha);
+            if (isManual) {
+              setGhFeedback(`Synced local changes to ${githubConfig.owner}/${githubConfig.repo} (${githubConfig.branch}).`, 'success');
+              showToast('Synced to GitHub.');
+            }
+          } else {
+            // Pull newer remote state onto this device
+            appState = {
+              ...remote.state,
+              lastSyncedAt: new Date().toISOString()
+            };
+            hasUnsyncedLocalChanges = false;
+            saveLocalState();
+            saveGithubConfig();
+            renderAll();
+            await checkFinishedBans(true);
+            if (isManual) {
+              setGhFeedback(`Synced! Loaded ${appState.bans.length} active ban(s) from GitHub.`, 'success');
+              showToast(`Synced ${appState.bans.length} active ban(s) from GitHub.`);
+            }
           }
         }
+
+        setSyncState('synced', githubConfig.repo);
       } catch (err) {
-        updateSyncStatusUI('error');
-        if (showModalFeedback) {
-          setGhFeedback(err.message || 'Unable to sync with GitHub.', 'error');
+        setSyncState('error', 'Sync Error');
+        if (isManual) {
+          setGhFeedback(err.message || 'Could not sync with GitHub. Check repo name, branch, and token permissions.', 'error');
         }
       } finally {
         isSyncInProgress = false;
+      }
+    }
+
+    async function persistAndSync(toastMsg = '') {
+      appState.lastUpdated = new Date().toISOString();
+      hasUnsyncedLocalChanges = true;
+      saveLocalState();
+      renderAll();
+
+      if (toastMsg) {
+        showToast(toastMsg);
+      }
+
+      if (isGithubConfigured()) {
+        await smartSyncGithub(false, true);
+      } else {
+        updateSyncStatusUI();
       }
     }
 
@@ -1154,100 +1431,117 @@
           smartSyncGithub(false, false);
         }
       });
-    }
-
-    // -------------------------------------------------------------------------
-    // 6. LIVE 1-SECOND TICKER & AUTOMATIC BAN COMPLETION ARCHIVER
-    // -------------------------------------------------------------------------
-    function startLiveTicker() {
-      if (liveTickerInterval) clearInterval(liveTickerInterval);
-      liveTickerInterval = setInterval(() => {
-        updateLiveTimersInPlace();
-        checkFinishedBans(false);
-      }, 1000);
-    }
-
-    function updateLiveTimersInPlace() {
-      const nowMs = Date.now();
-      const openDetailId = document.getElementById('detailBanId')?.value || '';
-      const isDetailOpen = !document.getElementById('modalBanDetail')?.classList.contains('hidden');
-
-      for (const ban of appState.bans) {
-        const metrics = computeBanMetrics(ban, nowMs);
-        const timerStr = `${metrics.days}d ${String(metrics.hours).padStart(2, '0')}h ${String(metrics.minutes).padStart(2, '0')}m ${String(metrics.seconds).padStart(2, '0')}s`;
-        const remStr = ban.isForever
-          ? 'Forever ∞'
-          : metrics.isCompleted
-          ? 'Done'
-          : `${formatDurationCompact(metrics.remainingMs)} left`;
-
-        const cardTimerEl = document.getElementById(`card-timer-${ban.id}`);
-        if (cardTimerEl) cardTimerEl.textContent = timerStr;
-
-        const cardRemEl = document.getElementById(`card-rem-${ban.id}`);
-        if (cardRemEl) cardRemEl.textContent = remStr;
-
-        const cardBarEl = document.getElementById(`card-bar-${ban.id}`);
-        if (cardBarEl) cardBarEl.style.width = `${metrics.progressPct.toFixed(2)}%`;
-
-        if (isDetailOpen && openDetailId === ban.id) {
-          const detailTimerEl = document.getElementById('detailLiveTimer');
-          if (detailTimerEl) detailTimerEl.textContent = timerStr;
-
-          const detailRemEl = document.getElementById('detailRemainingText');
-          if (detailRemEl) detailRemEl.textContent = remStr;
-
-          const detailBarEl = document.getElementById('detailProgressBar');
-          if (detailBarEl) detailBarEl.style.width = `${metrics.progressPct.toFixed(2)}%`;
+      window.addEventListener('online', () => {
+        if (isGithubConfigured()) {
+          smartSyncGithub(false, hasUnsyncedLocalChanges);
         }
-      }
+      });
     }
 
+    // -------------------------------------------------------------------------
+    // 5. LIVE 1-SECOND TICKER & AUTO-COMPLETION ARCHIVER
+    // -------------------------------------------------------------------------
     async function checkFinishedBans(silent = false) {
       const nowMs = Date.now();
-      const stillActive = [];
-      const newlyFinished = [];
+      let completedCount = 0;
+      let lastCompletedName = '';
 
-      for (const ban of appState.bans) {
-        const metrics = computeBanMetrics(ban, nowMs);
-        if (!ban.isForever && metrics.isCompleted) {
-          newlyFinished.push({
+      for (let i = appState.bans.length - 1; i >= 0; i--) {
+        const ban = appState.bans[i];
+        if (ban.isForever || !ban.targetEndDate) continue;
+
+        const endMs = new Date(ban.targetEndDate).getTime();
+        if (nowMs >= endMs) {
+          const metrics = computeBanMetrics(ban, endMs);
+          const archived = {
             ...ban,
             status: 'completed',
-            endedAt: ban.targetEndDate || new Date(nowMs).toISOString(),
+            endedAt: ban.targetEndDate,
             finalStreakDays: metrics.days,
             bestStreakDays: metrics.bestStreakDays
-          });
-        } else {
-          stillActive.push(ban);
+          };
+          appState.bans.splice(i, 1);
+          appState.savedBans.unshift(archived);
+          completedCount++;
+          lastCompletedName = ban.name;
+
+          const detailIdEl = document.getElementById('detailBanId');
+          if (detailIdEl && detailIdEl.value === ban.id) {
+            closeBanDetailModal();
+          }
         }
       }
 
-      if (newlyFinished.length > 0) {
-        appState.bans = stillActive;
-        appState.savedBans = [...newlyFinished, ...appState.savedBans];
-
-        const openDetailId = document.getElementById('detailBanId')?.value;
-        if (newlyFinished.some((b) => b.id === openDetailId)) {
-          closeBanDetailModal();
-        }
-
-        const msg =
-          newlyFinished.length === 1
-            ? `Achievement unlocked! Completed: "${newlyFinished[0].name}"`
-            : `Achievement unlocked! Completed ${newlyFinished.length} bans.`;
-
-        await persistAndSync(silent ? null : msg);
+      if (completedCount > 0) {
+        const msg = silent
+          ? ''
+          : completedCount === 1
+          ? `Achievement unlocked! "${lastCompletedName}" finished and saved.`
+          : `${completedCount} bans finished and saved to Achievements!`;
+        await persistAndSync(msg);
       }
     }
 
+    function updateLiveTimersTick() {
+      const nowMs = Date.now();
+
+      for (const ban of appState.bans) {
+        const m = computeBanMetrics(ban, nowMs);
+        const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+        const remStr = ban.isForever
+          ? 'Forever ∞'
+          : m.isCompleted
+          ? 'Done'
+          : `${formatDurationCompact(m.remainingMs)} left`;
+
+        const cardTimer = document.getElementById(`card-timer-${ban.id}`);
+        if (cardTimer) cardTimer.textContent = timerStr;
+
+        const cardRem = document.getElementById(`card-rem-${ban.id}`);
+        if (cardRem) cardRem.textContent = remStr;
+
+        const cardBar = document.getElementById(`card-bar-${ban.id}`);
+        if (cardBar) cardBar.style.width = `${m.progressPct.toFixed(2)}%`;
+      }
+
+      const detailModal = document.getElementById('modalBanDetail');
+      if (detailModal && !detailModal.classList.contains('hidden')) {
+        const activeId = document.getElementById('detailBanId')?.value;
+        const activeBan = appState.bans.find((b) => b.id === activeId);
+        if (activeBan) {
+          const m = computeBanMetrics(activeBan, nowMs);
+          const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
+          const remStr = activeBan.isForever
+            ? 'Forever ∞'
+            : m.isCompleted
+            ? 'Done'
+            : `${formatDurationCompact(m.remainingMs)} left`;
+
+          const dTimer = document.getElementById('detailLiveTimer');
+          if (dTimer) dTimer.textContent = timerStr;
+
+          const dRem = document.getElementById('detailRemainingText');
+          if (dRem) dRem.textContent = remStr;
+
+          const dBar = document.getElementById('detailProgressBar');
+          if (dBar) dBar.style.width = `${m.progressPct.toFixed(2)}%`;
+        }
+      }
+
+      checkFinishedBans(false);
+    }
+
+    function startLiveTicker() {
+      if (liveTickerInterval) clearInterval(liveTickerInterval);
+      liveTickerInterval = setInterval(updateLiveTimersTick, 1000);
+    }
+
     // -------------------------------------------------------------------------
-    // 7. HOME CARDS & 53-WEEK GITHUB ACTIVITY GRAPH RENDERING
+    // 6. HOME SCREEN RENDERING & 53-WEEK GITHUB ACTIVITY GRAPH
     // -------------------------------------------------------------------------
     function renderAll() {
-      renderBansList();
+      renderBansGrid();
       updateAchievementsBadge();
-      updateSyncStatusUI();
       if (!document.getElementById('modalAchievements')?.classList.contains('hidden')) {
         renderAchievementsList();
       }
@@ -1260,65 +1554,74 @@
       badge.textContent = String(completedCount);
     }
 
-    function renderBansList() {
+    function renderBansGrid() {
       const grid = document.getElementById('bansGrid');
       const emptyState = document.getElementById('emptyState');
       if (!grid || !emptyState) return;
 
       if (!appState.bans || appState.bans.length === 0) {
         grid.innerHTML = '';
-        grid.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
       }
 
       emptyState.classList.add('hidden');
-      grid.classList.remove('hidden');
-
       const nowMs = Date.now();
+
       grid.innerHTML = appState.bans
         .map((ban) => {
-          const metrics = computeBanMetrics(ban, nowMs);
-          const timerStr = `${metrics.days}d ${String(metrics.hours).padStart(2, '0')}h ${String(metrics.minutes).padStart(2, '0')}m ${String(metrics.seconds).padStart(2, '0')}s`;
-          const totalDurStr = formatTotalDuration(ban);
+          const m = computeBanMetrics(ban, nowMs);
+          const timerStr = `${m.days}d ${String(m.hours).padStart(2, '0')}h ${String(m.minutes).padStart(2, '0')}m ${String(m.seconds).padStart(2, '0')}s`;
           const remStr = ban.isForever
             ? 'Forever ∞'
-            : metrics.isCompleted
+            : m.isCompleted
             ? 'Done'
-            : `${formatDurationCompact(metrics.remainingMs)} left`;
+            : `${formatDurationCompact(m.remainingMs)} left`;
+          const totalLabel = formatTotalDuration(ban);
 
           return `
-            <button
-              type="button"
+            <article
+              data-ban-card-id="${escapeHtml(ban.id)}"
               onclick="openBanDetailModal('${escapeHtml(ban.id)}')"
-              class="w-full text-left rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] p-4 sm:p-5 transition active:scale-[0.99] shadow-sm flex flex-col justify-between gap-3.5"
+              class="cursor-pointer group rounded-2xl border border-[#d0d7de] dark:border-[#30363d] bg-[#ffffff] dark:bg-[#161b22] hover:border-[#2ea043] dark:hover:border-[#2ea043] p-4 sm:p-5 transition shadow-sm active:scale-[0.99]"
             >
-              <div class="flex items-start justify-between gap-3 w-full">
+              <div class="flex items-start justify-between gap-3 mb-3.5">
                 <div class="min-w-0">
-                  <h2 class="text-base sm:text-lg font-semibold leading-snug break-words">
+                  <h2 class="text-base sm:text-lg font-bold tracking-tight truncate group-hover:text-[#2ea043] transition">
                     ${escapeHtml(ban.name)}
                   </h2>
-                  <div class="text-xs text-[#656d76] dark:text-[#8b949e] mt-0.5">
-                    Total: <span class="font-medium text-[#1f2328] dark:text-[#e6edf3]">${escapeHtml(totalDurStr)}</span>
+                  <div class="text-[11px] text-[#656d76] dark:text-[#8b949e] mt-0.5">
+                    Total: <span class="font-medium text-[#1f2328] dark:text-[#e6edf3]">${escapeHtml(totalLabel)}</span>
                   </div>
                 </div>
-                <span id="card-rem-${escapeHtml(ban.id)}" class="shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e] border border-[#d0d7de]/70 dark:border-[#30363d]">
+                <span
+                  id="card-rem-${escapeHtml(ban.id)}"
+                  class="text-xs font-medium text-[#656d76] dark:text-[#8b949e] shrink-0 pt-0.5 tabular-nums"
+                >
                   ${escapeHtml(remStr)}
                 </span>
               </div>
 
-              <div class="w-full space-y-2">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-[#656d76] dark:text-[#8b949e]">Passed</span>
-                  <span id="card-timer-${escapeHtml(ban.id)}" class="font-mono font-semibold text-[#2ea043] tabular-nums">
-                    ${timerStr}
-                  </span>
-                </div>
-                <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
-                  <div id="card-bar-${escapeHtml(ban.id)}" class="h-full bg-[#2ea043] rounded-full transition-all duration-500" style="width: ${metrics.progressPct.toFixed(2)}%"></div>
-                </div>
+              <div class="flex items-baseline justify-between gap-2 mb-2.5">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-[#656d76] dark:text-[#8b949e]">
+                  Passed
+                </span>
+                <span
+                  id="card-timer-${escapeHtml(ban.id)}"
+                  class="text-sm sm:text-base font-mono font-semibold text-[#2ea043] tabular-nums"
+                >
+                  ${timerStr}
+                </span>
               </div>
-            </button>
+
+              <div class="w-full h-1.5 rounded-full bg-[#eaeef2] dark:bg-[#21262d] overflow-hidden">
+                <div
+                  id="card-bar-${escapeHtml(ban.id)}"
+                  class="h-full bg-[#2ea043] rounded-full transition-all duration-500"
+                  style="width: ${m.progressPct.toFixed(2)}%"
+                ></div>
+              </div>
+            </article>
           `;
         })
         .join('');
@@ -1327,6 +1630,7 @@
     function renderBanHeatmap(ban) {
       const container = document.getElementById('detailHeatmapContainer');
       const summaryEl = document.getElementById('detailGraphSummary');
+      const scrollEl = document.getElementById('detailHeatmapScroll');
       if (!container) return;
 
       const today = new Date();
@@ -1335,7 +1639,6 @@
       const banStart = new Date(ban.startDate);
       banStart.setHours(0, 0, 0, 0);
 
-      // Build 53 weeks (Sun -> Sat) ending on Saturday of the current week
       const dayOfWeek = today.getDay();
       const endOfGrid = new Date(today);
       endOfGrid.setDate(today.getDate() + (6 - dayOfWeek));
@@ -1344,32 +1647,11 @@
       const startOfGrid = new Date(endOfGrid);
       startOfGrid.setDate(endOfGrid.getDate() - (totalWeeks * 7 - 1));
 
-      // Also include any archived periods for the exact same ban name if present
-      const activeIntervals = [{ start: banStart.getTime(), end: today.getTime() }];
-      if (Array.isArray(appState.savedBans)) {
-        for (const past of appState.savedBans) {
-          if (past.name && ban.name && past.name.trim().toLowerCase() === ban.name.trim().toLowerCase()) {
-            const pStart = new Date(past.startDate);
-            pStart.setHours(0, 0, 0, 0);
-            const pEnd = new Date(past.endedAt || past.targetEndDate || today);
-            pEnd.setHours(0, 0, 0, 0);
-            activeIntervals.push({ start: pStart.getTime(), end: pEnd.getTime() });
-          }
-        }
-      }
-
-      function isDayBanned(dayMs) {
-        for (const interval of activeIntervals) {
-          if (dayMs >= interval.start && dayMs <= interval.end) return true;
-        }
-        return false;
-      }
-
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      let bannedDaysCount = 0;
       const weeks = [];
       const monthHeaders = [];
       let lastMonthShown = -1;
+      let bannedDaysCount = 0;
 
       const cursor = new Date(startOfGrid);
       for (let w = 0; w < totalWeeks; w++) {
@@ -1380,9 +1662,9 @@
           const cellDate = new Date(cursor);
           const cellMs = cellDate.getTime();
           const isFuture = cellMs > today.getTime();
-          const banned = !isFuture && isDayBanned(cellMs);
+          const isBanned = !isFuture && cellMs >= banStart.getTime();
 
-          if (banned) bannedDaysCount++;
+          if (isBanned) bannedDaysCount++;
 
           if (d === 0) {
             const m = cellDate.getMonth();
@@ -1393,9 +1675,13 @@
           }
 
           weekDays.push({
-            dateStr: cellDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }),
+            dateStr: cellDate.toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            }),
             isFuture,
-            banned
+            isBanned
           });
 
           cursor.setDate(cursor.getDate() + 1);
@@ -1441,11 +1727,9 @@
           <div class="flex flex-col gap-[3px]">
             ${week
               .map((day) => {
-                if (day.isFuture) {
-                  return `<div class="gh-cell gh-cell-future"></div>`;
-                }
-                const cls = day.banned ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
-                const statusLabel = day.banned ? 'Banned' : 'Inactive';
+                if (day.isFuture) return `<div class="gh-cell gh-cell-future"></div>`;
+                const cls = day.isBanned ? 'gh-cell gh-cell-active' : 'gh-cell gh-cell-inactive';
+                const statusLabel = day.isBanned ? 'Banned' : 'Inactive';
                 return `<div
                   class="${cls}"
                   onmouseenter="showHeatmapTooltip(event, '${escapeHtml(day.dateStr)}', '${statusLabel}')"
@@ -1469,22 +1753,21 @@
         </div>
       `;
 
-      requestAnimationFrame(() => {
-        const scrollWrap = document.getElementById('detailHeatmapScroll');
-        if (scrollWrap) {
-          scrollWrap.scrollLeft = scrollWrap.scrollWidth;
-        }
-      });
+      if (scrollEl) {
+        requestAnimationFrame(() => {
+          scrollEl.scrollLeft = scrollEl.scrollWidth;
+        });
+      }
     }
 
     function showHeatmapTooltip(event, dateStr, detailStr) {
       const tip = document.getElementById('heatmapTooltip');
-      const dateEl = document.getElementById('heatmapTooltipDate');
-      const detailEl = document.getElementById('heatmapTooltipDetail');
-      if (!tip || !dateEl || !detailEl) return;
+      const tipDate = document.getElementById('heatmapTooltipDate');
+      const tipDetail = document.getElementById('heatmapTooltipDetail');
+      if (!tip || !tipDate || !tipDetail) return;
 
-      dateEl.textContent = dateStr;
-      detailEl.textContent = detailStr;
+      tipDate.textContent = dateStr;
+      tipDetail.textContent = detailStr;
       tip.classList.remove('hidden');
 
       const rect = event.target.getBoundingClientRect();
@@ -1502,35 +1785,181 @@
     }
 
     function hideHeatmapTooltip() {
-      const tip = document.getElementById('heatmapTooltip');
-      if (tip) tip.classList.add('hidden');
+      document.getElementById('heatmapTooltip')?.classList.add('hidden');
     }
 
     // -------------------------------------------------------------------------
-    // 8. MODAL CONTROLS & CRUD ACTIONS (START, UPDATE, CANCEL ONLY)
+    // 7. TOAST NOTIFICATIONS
     // -------------------------------------------------------------------------
-    function showToast(message, durationMs = 3500) {
+    function showToast(message) {
       const banner = document.getElementById('toastBanner');
       const msgEl = document.getElementById('toastMessage');
       if (!banner || !msgEl) return;
 
       msgEl.textContent = message;
       banner.classList.remove('hidden');
+
       if (toastTimeout) clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         hideToast();
-      }, durationMs);
+      }, 4000);
     }
 
     function hideToast() {
-      const banner = document.getElementById('toastBanner');
-      if (banner) banner.classList.add('hidden');
+      document.getElementById('toastBanner')?.classList.add('hidden');
     }
 
+    // -------------------------------------------------------------------------
+    // 8. MODAL CONTROLLERS
+    // -------------------------------------------------------------------------
     // --- Modal 1: Start a Ban ---
+    function getUniqueSavedBans() {
+      const seen = new Map();
+      for (const ban of appState.savedBans || []) {
+        const key = (ban.name || '').trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.set(key, ban);
+        }
+      }
+      return Array.from(seen.values());
+    }
+
+    function extractSavedBanDuration(ban) {
+      if (!ban || ban.isForever || !ban.targetEndDate) {
+        return { days: 0, hours: 0, isForever: true };
+      }
+      if (typeof ban.durationDays === 'number' || typeof ban.durationHours === 'number') {
+        const totalHours = Math.max(1, (Number(ban.durationDays) || 0) * 24 + (Number(ban.durationHours) || 0));
+        return {
+          days: Math.floor(totalHours / 24),
+          hours: totalHours % 24,
+          isForever: false
+        };
+      }
+      const diffMs = Math.max(0, new Date(ban.targetEndDate).getTime() - new Date(ban.startDate).getTime());
+      const totalHours = Math.max(1, Math.round(diffMs / 3600000));
+      return {
+        days: Math.floor(totalHours / 24),
+        hours: totalHours % 24,
+        isForever: false
+      };
+    }
+
+    function renderStartSavedPicker() {
+      const wrap = document.getElementById('startSavedPickerWrap');
+      const pillsContainer = document.getElementById('startSavedPills');
+      if (!wrap || !pillsContainer) return;
+
+      const uniqueSaved = getUniqueSavedBans();
+      if (uniqueSaved.length === 0) {
+        wrap.classList.add('hidden');
+        pillsContainer.innerHTML = '';
+        return;
+      }
+
+      wrap.classList.remove('hidden');
+
+      const isNewActive = selectedSavedBanKey === '__new__';
+      const newBtnClass = isNewActive
+        ? 'border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043]'
+        : 'border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] text-[#656d76] dark:text-[#8b949e] hover:border-[#2ea043]';
+
+      const newPillHtml = `
+        <button
+          type="button"
+          onclick="selectNewBanMode(true)"
+          class="px-3 py-1.5 min-h-[34px] rounded-xl text-xs font-semibold border transition inline-flex items-center gap-1 ${newBtnClass}"
+        >
+          <span>+ New</span>
+        </button>
+      `;
+
+      const savedPillsHtml = uniqueSaved
+        .map((ban) => {
+          const key = (ban.name || '').trim().toLowerCase();
+          const isSelected = selectedSavedBanKey === key;
+          const durLabel = formatTotalDuration(ban);
+          const btnClass = isSelected
+            ? 'border-[#2ea043] bg-[#2ea043]/15 text-[#2ea043]'
+            : 'border-[#d0d7de] dark:border-[#30363d] bg-[#f6f8fa] dark:bg-[#0d1117] text-[#1f2328] dark:text-[#e6edf3] hover:border-[#2ea043]';
+
+          return `
+            <button
+              type="button"
+              data-saved-key="${escapeHtml(key)}"
+              onclick="selectSavedBanTemplate(this.getAttribute('data-saved-key'))"
+              class="px-3 py-1.5 min-h-[34px] rounded-xl text-xs font-medium border transition inline-flex items-center gap-1.5 max-w-full ${btnClass}"
+            >
+              <span class="truncate max-w-[160px]">${escapeHtml(ban.name)}</span>
+              <span class="text-[11px] opacity-70 shrink-0">${escapeHtml(durLabel)}</span>
+            </button>
+          `;
+        })
+        .join('');
+
+      pillsContainer.innerHTML = newPillHtml + savedPillsHtml;
+    }
+
+    function selectNewBanMode(shouldFocus = false) {
+      selectedSavedBanKey = '__new__';
+      document.getElementById('inputBanName').value = '';
+      document.getElementById('inputBanReason').value = '';
+      selectStartPreset(30, 0, false);
+      renderStartSavedPicker();
+      if (shouldFocus) {
+        setTimeout(() => document.getElementById('inputBanName')?.focus(), 40);
+      }
+    }
+
+    function selectSavedBanTemplate(normalizedKey) {
+      const savedBan = getUniqueSavedBans().find(
+        (b) => (b.name || '').trim().toLowerCase() === normalizedKey
+      );
+      if (!savedBan) {
+        selectNewBanMode(true);
+        return;
+      }
+
+      selectedSavedBanKey = normalizedKey;
+      document.getElementById('inputBanName').value = savedBan.name || '';
+      document.getElementById('inputBanReason').value = savedBan.reason || '';
+
+      const { days, hours, isForever } = extractSavedBanDuration(savedBan);
+      if (isForever) {
+        selectStartPreset(0, 0, true);
+      } else if (
+        (days === 0 && hours === 6) ||
+        (days === 0 && hours === 24) ||
+        (days === 7 && hours === 0) ||
+        (days === 30 && hours === 0)
+      ) {
+        selectStartPreset(days, hours, false);
+      } else {
+        document.getElementById('inputStartDays').value = days;
+        document.getElementById('inputStartHours').value = hours;
+        onStartDurationManualInput();
+      }
+
+      renderStartSavedPicker();
+    }
+
+    function onStartBanNameInput() {
+      const typedKey = (document.getElementById('inputBanName').value || '').trim().toLowerCase();
+      const matched = getUniqueSavedBans().find(
+        (b) => (b.name || '').trim().toLowerCase() === typedKey
+      );
+      const nextKey = matched ? typedKey : '__new__';
+      if (nextKey !== selectedSavedBanKey) {
+        selectedSavedBanKey = nextKey;
+        renderStartSavedPicker();
+      }
+    }
+
     function openStartBanModal() {
       document.getElementById('formStartBan').reset();
+      selectedSavedBanKey = '__new__';
       selectStartPreset(30, 0, false);
+      renderStartSavedPicker();
       document.getElementById('modalStartBan').classList.remove('hidden');
       setTimeout(() => document.getElementById('inputBanName')?.focus(), 60);
     }
@@ -2175,6 +2604,40 @@
         });
       }
     }
+
+    // -------------------------------------------------------------------------
+    // 9. INITIALIZATION & KEYBOARD SHORTCUTS
+    // -------------------------------------------------------------------------
+    function initApp() {
+      initTheme();
+      loadLocalState();
+      loadGithubConfig();
+      renderAll();
+      checkFinishedBans(true);
+      startLiveTicker();
+      startAutoSyncListeners();
+
+      if (isGithubConfigured()) {
+        smartSyncGithub(false, false);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!document.getElementById('modalUpdateBan')?.classList.contains('hidden')) {
+        closeUpdateBanModal();
+      } else if (!document.getElementById('modalStartBan')?.classList.contains('hidden')) {
+        closeStartBanModal();
+      } else if (!document.getElementById('modalBanDetail')?.classList.contains('hidden')) {
+        closeBanDetailModal();
+      } else if (!document.getElementById('modalGithub')?.classList.contains('hidden')) {
+        closeGithubModal();
+      } else if (!document.getElementById('modalAchievements')?.classList.contains('hidden')) {
+        closeAchievementsModal();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
